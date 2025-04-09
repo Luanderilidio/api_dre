@@ -1,0 +1,2 @@
+# Forçar final de linha Unix (LF) em todos os arquivos de texto
+* text=auto eol=lf

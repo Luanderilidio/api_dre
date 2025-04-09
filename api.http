@@ -1,0 +1,38 @@
+POST http://localhost:3333/subscriptions
+Content-Type:  application/json
+
+{
+    "name": "Rafa",
+    "email": "rafa@gmail.com"
+}
+
+###
+
+GET http://localhost:3333/subscriptions
+Content-Type:  application/json
+
+
+###
+
+GET http://localhost:3333/subscriptions/40a07d5d-c6a9-4370-b286-19fdb1785313
+Content-Type:  application/json
+
+
+###
+
+
+PATCH  http://localhost:3333/subscriptions/a0b740ed-0540-4a8f-b39b-d5f88690b70a
+Content-Type:  application/json
+
+{
+    "name": "rafa2",
+    "email": "rafa2@gmail.com"
+}
+
+###
+
+
+DELETE  http://localhost:3333/subscriptions/40a07d5d-c6a9-4370-b286-19fdb1785313
+
+
+

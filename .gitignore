@@ -1,0 +1,39 @@
+# Node modules
+node_modules/
+
+# Ambiente
+.env
+.env.* # .env.development, .env.test, etc.
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Diretórios de build
+dist/
+build/
+.out/
+
+# Drizzle
+.drizzle/
+.drizzle-kit/
+.meta/
+drizzle.config.ts # Se você quiser mantê-lo local
+
+# Cache do TypeScript
+*.tsbuildinfo
+
+# IDEs
+.vscode/
+.idea/
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Testes temporários
+coverage/
+*.lcov
