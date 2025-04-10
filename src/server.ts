@@ -28,8 +28,12 @@ import { PostStudents } from "./routes/Studants/PostStudants";
 import { PathStudentsById } from "./routes/Studants/PathStudantsById";
 import { DeleteStudents } from "./routes/Studants/DeleteStudants";
 import { PostGremios } from "./routes/Gremios/PostGremios";
-
-
+import { GetAllGremios } from "./routes/Gremios/GetAllGremios";
+import { GetGremioById } from "./routes/Gremios/GetGremiosById";
+import { PatchGremioById } from "./routes/Gremios/PathGremiosById";
+import { DeleteGremios } from "./routes/Gremios/DeleteGremios";
+import { PostMembersGremio } from "./routes/MembersGremio/PostMembersGremio";
+import { GetAllMembersGremio } from "./routes/MembersGremio/GetAllMembersGremio";
 
 const app = fastify().withTypeProvider<ZodTypeProvider>();
 
@@ -54,27 +58,35 @@ app.register(fastifyCors, {
 app.setSerializerCompiler(serializerCompiler);
 app.setValidatorCompiler(validatorCompiler);
 
-app.register(GetAllSchools)
-app.register(GetSchoolsById)
-app.register(PostSchools)
-app.register(PathSchoolsById)
-app.register(DeleteSchools)
+app.register(GetAllSchools);
+app.register(GetSchoolsById);
+app.register(PostSchools);
+app.register(PathSchoolsById);
+app.register(DeleteSchools);
 
-app.register(GetAllInterlocutors)
-app.register(GetInterlocutorsById)
-app.register(PostInterlocutors)
-app.register(PathInterlocutorsById)
-app.register(DeleteInterlocutors)
+app.register(GetAllInterlocutors);
+app.register(GetInterlocutorsById);
+app.register(PostInterlocutors);
+app.register(PathInterlocutorsById);
+app.register(DeleteInterlocutors);
 
-app.register(GetAllStudents)
-app.register(GetStudentsById)
-app.register(PostStudents)
-app.register(PathStudentsById)
-app.register(DeleteStudents)
+app.register(GetAllStudents);
+app.register(GetStudentsById);
+app.register(PostStudents);
+app.register(PathStudentsById);
+app.register(DeleteStudents);
 
-app.register(PostGremios)
+app.register(PostGremios);
+app.register(GetAllGremios);
+app.register(GetGremioById);
+app.register(PatchGremioById);
+app.register(DeleteGremios);
+
+app.register(PostMembersGremio);
+app.register(GetAllMembersGremio)
+
 
 
 app.listen({ port: env.PORT }).then(() => {
-  console.log("HTTP server running!");
+  console.log("🚀  HTTP server running! ✨");
 });

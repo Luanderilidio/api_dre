@@ -4,13 +4,13 @@ import { gremios } from "../../drizzle/schema/gremios";
 import { eq } from "drizzle-orm";
 import z from "zod";
 
-export const DeleteGremios: FastifyPluginAsyncZod = async (app) => {
+export const DeleteMembersGremio: FastifyPluginAsyncZod = async (app) => {
   app.delete(
-    "/gremios/:id",
+    "/members-gremio/:id",
     {
       schema: {
-        tags: ["gremios"],
-        summary: "Deleta um grêmio pelo ID",
+        tags: ["members-gremio"],
+        summary: "Deleta um membro do grêmio pelo ID",
         description: "descricao",
         params: z.object({
           id: z.string().min(6),

@@ -4,14 +4,14 @@ import z from "zod";
 import { eq } from "drizzle-orm";
 import { gremios } from "../../drizzle/schema/gremios";
 
-export const GetGremioById: FastifyPluginAsyncZod = async (app) => {
+export const GetMembersGremioById: FastifyPluginAsyncZod = async (app) => {
   app.get(
-    "/gremios/:id",
+    "/members-gremio/:id",
     {
       schema: {
-        tags: ["gremios"],
-        summary: "Busca um grêmio pelo ID",
-        description: "Retorna um grêmio com seus relacionamentos",
+        tags: ["members-gremio"],
+        summary: "Busca um membro do grêmio pelo ID",
+        description: "Retorna um membro do grêmio com seus relacionamentos",
         params: z.object({
           id: z.string().min(6),
         }),

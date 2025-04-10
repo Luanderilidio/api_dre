@@ -5,14 +5,14 @@ import { eq } from "drizzle-orm";
 import z from "zod";
 import { interlocutors, schools } from "../../drizzle";
 
-export const PatchGremioById: FastifyPluginAsyncZod = async (app) => {
+export const PathMembersGremioById: FastifyPluginAsyncZod = async (app) => {
   app.patch(
-    "/gremios/:id",
+    "/members-gremio/:id",
     {
       schema: {
-        tags: ["gremios"],
-        summary: "Atualiza um grêmio pelo ID",
-        description: "Edita informações de um grêmio existente",
+        tags: ["members-gremio"],
+        summary: "Atualiza um membro do grêmio pelo ID",
+        description: "Edita informações de um membro grêmio existente",
         params: z.object({
           id: z.string().min(6), // já valida que o ID é string válida
         }),

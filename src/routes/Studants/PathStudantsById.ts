@@ -2,7 +2,7 @@ import { and, eq, not, or } from "drizzle-orm";
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import z from "zod";
 import { db } from "../../drizzle/client";
-import { students } from "../../drizzle/schema/students";
+import { shiftEnum, students } from "../../drizzle/schema/students";
 
 // Define um plugin Fastify para a rota PATCH /students/:id
 export const PathStudentsById: FastifyPluginAsyncZod = async (app) => {
@@ -26,9 +26,7 @@ export const PathStudentsById: FastifyPluginAsyncZod = async (app) => {
           contact: z.string().optional(),
           email: z.string().email().optional(),
           series: z.string().optional(),
-          shifts: z
-            .array(z.enum(["matutino", "vespertino", "noturno", "integral"]))
-            .optional(),
+          shifts: shiftEnum,
           img_profile: z.string().nullable().optional(),
           status: z.boolean().optional(),
         }),

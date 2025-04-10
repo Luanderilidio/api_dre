@@ -4,13 +4,21 @@ import z from "zod";
 import { db } from "../../drizzle/client";
 import { students } from "../../drizzle/schema/students";
 
+const shifts = ["matutino", "vespertino", "noturno", "integral"] as const;
+
+// Cria o enum do Zod
+export const ShiftsEnumZod = z.enum(shifts);
+
+// Tipo TypeScript gerado automaticamente
+export type Role = z.infer<typeof ShiftsEnumZod>;
+
 export const PostStudents: FastifyPluginAsyncZod = async (app) => {
   app.post(
     "/students/",
     {
       schema: {
         tags: ["students"],
-        summary: "Cadastra um estudante pelo ID",
+        summary: "Cadastra um estudante",
         description: "descrição da rota",
         body: z.object({
           registration: z.string(),
@@ -18,15 +26,13 @@ export const PostStudents: FastifyPluginAsyncZod = async (app) => {
           contact: z.string(),
           email: z.string().email(),
           series: z.string(),
-          shifts: z.array(
-            z.enum(["matutino", "vespertino", "noturno", "integral"])
-          ),
-          img_profile: z.string().nullable().optional(),
+          shift: z.enum(["matutino", "vespertino", "noturno", "integral"]),
+          url_profile: z.string().nullable().optional(),
           status: z.boolean(),
         }),
         response: {
           200: z.object({
-            message: z.string(),
+            studentId: z.string(),
           }),
           404: z.object({
             message: z.string(),
@@ -45,8 +51,8 @@ export const PostStudents: FastifyPluginAsyncZod = async (app) => {
           email,
           contact,
           series,
-          shifts,
-          img_profile,
+          shift,
+          url_profile,
           status,
         } = request.body;
 
@@ -70,7 +76,7 @@ export const PostStudents: FastifyPluginAsyncZod = async (app) => {
         }
 
         // Atualiza o estudante se tudo existiver ok
-        const student = await db
+        const [student] = await db
           .insert(students)
           .values({
             registration,
@@ -78,15 +84,15 @@ export const PostStudents: FastifyPluginAsyncZod = async (app) => {
             email,
             contact,
             series,
-            shifts,
-            img_profile,
+            shift,
+            url_profile,
             status,
           })
           .returning();
 
-        console.log("Update Estudante", student[0]);
+        console.log("Update Estudante", student);
 
-        return reply.status(200).send({ message: "Estudante atualizado!" });
+        return reply.status(200).send({ studentId: student.id });
       } catch (error) {
         console.log(error);
         return reply

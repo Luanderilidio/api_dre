@@ -7,7 +7,6 @@ import { timestamp } from "drizzle-orm/pg-core";
 import { boolean } from "drizzle-orm/pg-core";
 import { index } from "drizzle-orm/pg-core";
 
-// Define o ENUM de cargos no PostgreSQL
 export const roleEnum = pgEnum("role", [
   "DIRETOR",
   "VICE-PRESIDENTE",
@@ -22,7 +21,6 @@ export const roleEnum = pgEnum("role", [
   "DIRETOR DE SAÚDE E MEIO AMBIENTE",
 ]);
 
-// Tabela de membros do grêmio
 export const studentsGremioMembers = pgTable("students_gremio_members", {
   id: text("id")
     .primaryKey()

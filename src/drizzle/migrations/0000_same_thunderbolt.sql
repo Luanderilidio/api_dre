@@ -1,3 +1,4 @@
+CREATE TYPE "public"."shift" AS ENUM('matutino', 'vespertino', 'noturno', 'integral');--> statement-breakpoint
 CREATE TYPE "public"."role" AS ENUM('DIRETOR', 'VICE-PRESIDENTE', 'SECRETÁRIO GERAL I', 'SECRETÁRIO GERAL II', '1° SECRETÁRIO', 'TESOUREIRO GERAL', '1º TESOUREIRO', 'DIRETOR SOCIAL', 'DIRETOR DE COMUNICAÇÃO', 'DIRETOR DE ESPORTES E CULTURA', 'DIRETOR DE SAÚDE E MEIO AMBIENTE');--> statement-breakpoint
 CREATE TABLE "gremios" (
 	"id" text PRIMARY KEY NOT NULL,
@@ -9,11 +10,53 @@ CREATE TABLE "gremios" (
 	"validity_date" timestamp,
 	"approval_date" timestamp,
 	"url_folder" text,
+	"created_at" timestamp DEFAULT now(),
+	"disabled_at" timestamp,
+	"updated_at" timestamp,
+	"deleted_at" timestamp,
+	CONSTRAINT "gremios_school_id_unique" UNIQUE("school_id")
+);
+--> statement-breakpoint
+CREATE TABLE "interlocutors" (
+	"id" text PRIMARY KEY NOT NULL,
+	"name" text NOT NULL,
+	"contact" text NOT NULL,
+	"email" text NOT NULL,
+	"status" boolean DEFAULT true NOT NULL,
+	"created_at" timestamp DEFAULT now(),
+	"disabled_at" timestamp,
+	"updated_at" timestamp,
+	"deleted_at" timestamp,
+	CONSTRAINT "interlocutors_email_unique" UNIQUE("email")
+);
+--> statement-breakpoint
+CREATE TABLE "school" (
+	"id" text PRIMARY KEY NOT NULL,
+	"name" text NOT NULL,
+	"city" text NOT NULL,
+	"status" boolean DEFAULT true NOT NULL,
+	"created_at" timestamp DEFAULT now(),
+	"disabled_at" timestamp,
+	"updated_at" timestamp,
+	"deleted_at" timestamp
+);
+--> statement-breakpoint
+CREATE TABLE "students" (
+	"id" text PRIMARY KEY NOT NULL,
+	"registration" text NOT NULL,
+	"name" text NOT NULL,
+	"contact" text NOT NULL,
+	"email" text NOT NULL,
+	"series" text NOT NULL,
+	"shift" "shift" NOT NULL,
+	"url_profile" text,
+	"status" boolean DEFAULT true NOT NULL,
 	"disabled_at" timestamp,
 	"created_at" timestamp DEFAULT now(),
 	"updated_at" timestamp,
 	"deleted_at" timestamp,
-	CONSTRAINT "gremios_school_id_unique" UNIQUE("school_id")
+	CONSTRAINT "students_registration_unique" UNIQUE("registration"),
+	CONSTRAINT "students_email_unique" UNIQUE("email")
 );
 --> statement-breakpoint
 CREATE TABLE "students_gremio_members" (

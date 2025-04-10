@@ -42,8 +42,8 @@ export const gremios = pgTable("gremios", {
   url_folder: text("url_folder"), // aqui estava incorretamente "school_id" como nome da coluna
 
   // metadados
-  disabled_at: timestamp("disabled_at"),
   created_at: timestamp("created_at").defaultNow(),
+  disabled_at: timestamp("disabled_at"),
   updated_at: timestamp("updated_at"),
   deleted_at: timestamp("deleted_at"),
 

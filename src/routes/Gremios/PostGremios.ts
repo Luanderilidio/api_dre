@@ -6,6 +6,27 @@ import { gremios } from "../../drizzle/schema/gremios";
 import { schools } from "../../drizzle/schema/schools";
 import { interlocutors } from "../../drizzle/schema/interlocutors";
 
+const roles = [
+  "DIRETOR",
+  "VICE-PRESIDENTE",
+  "SECRETÁRIO GERAL I",
+  "SECRETÁRIO GERAL II",
+  "1° SECRETÁRIO",
+  "TESOUREIRO GERAL",
+  "1º TESOUREIRO",
+  "DIRETOR SOCIAL",
+  "DIRETOR DE COMUNICAÇÃO",
+  "DIRETOR DE ESPORTES E CULTURA",
+  "DIRETOR DE SAÚDE E MEIO AMBIENTE",
+] as const;
+
+// Cria o enum do Zod
+export const RoleEnumZod = z.enum(roles);
+
+// Tipo TypeScript gerado automaticamente
+export type Role = z.infer<typeof RoleEnumZod>;
+
+
 export const PostGremios: FastifyPluginAsyncZod = async (app) => {
   app.post(
     "/gremios",
@@ -62,7 +83,7 @@ export const PostGremios: FastifyPluginAsyncZod = async (app) => {
           });
         }
 
-        // 🗣️ Verifica se o interlocutor existe
+        
         const interlocutor = await db
           .select()
           .from(interlocutors)
@@ -74,7 +95,6 @@ export const PostGremios: FastifyPluginAsyncZod = async (app) => {
           });
         }
 
-        // 🔍 Verifica se a escola já tem um grêmio
         const gremioExists = await db
           .select()
           .from(gremios)
@@ -86,7 +106,6 @@ export const PostGremios: FastifyPluginAsyncZod = async (app) => {
           });
         }
 
-        // ✅ Criação do grêmio
         const [gremio] = await db
           .insert(gremios)
           .values({

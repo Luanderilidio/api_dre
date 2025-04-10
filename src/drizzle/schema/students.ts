@@ -18,10 +18,12 @@ export const students = pgTable("students", {
   contact: text("contact").notNull(),
   email: text("email").unique().notNull(),
   series: text("series").notNull(),
-  shifts: text("shifts").array().notNull(),
-  img_profile: text(""),
+  shift: shiftEnum("shift").notNull(),
+  url_profile: text("url_profile"),
   status: boolean("status").default(true).notNull(),
-  created_at: timestamp("created_at").notNull().defaultNow(),
+
+  disabled_at: timestamp("disabled_at"),
+  created_at: timestamp("created_at").defaultNow(),
   updated_at: timestamp("updated_at"),
   deleted_at: timestamp("deleted_at"),
 });
