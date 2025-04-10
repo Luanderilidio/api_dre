@@ -27,6 +27,7 @@ import { GetStudentsById } from "./routes/Studants/GetStudantsById";
 import { PostStudents } from "./routes/Studants/PostStudants";
 import { PathStudentsById } from "./routes/Studants/PathStudantsById";
 import { DeleteStudents } from "./routes/Studants/DeleteStudants";
+import { PostGremios } from "./routes/Gremios/PostGremios";
 
 
 
@@ -71,6 +72,7 @@ app.register(PostStudents)
 app.register(PathStudentsById)
 app.register(DeleteStudents)
 
+app.register(PostGremios)
 
 
 app.listen({ port: env.PORT }).then(() => {
