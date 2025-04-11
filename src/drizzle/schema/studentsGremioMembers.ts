@@ -27,11 +27,12 @@ export const studentsGremioMembers = pgTable("students_gremio_members", {
     .$defaultFn(() => generateShortId()),
 
   gremio_id: text("gremio_id")
-    .notNull()
+    .notNull().unique()
     .references(() => gremios.id, { onDelete: "cascade" }),
 
   student_id: text("student_id")
     .notNull()
+    .unique()
     .references(() => students.id, { onDelete: "cascade" }),
 
   role: roleEnum("role").notNull(),

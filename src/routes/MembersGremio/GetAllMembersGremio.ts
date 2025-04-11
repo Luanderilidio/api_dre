@@ -18,6 +18,10 @@ export const GetAllMembersGremio: FastifyPluginAsyncZod = async (app) => {
               gremio_id: z.string().min(6),
               role: RoleEnumZod,
               status: z.boolean(),
+              disabled_at: z.date().nullable().optional(),
+              created_at: z.date().nullable().optional(),
+              updated_at: z.date().nullable().optional(),
+              deleted_at: z.date().nullable().optional(),
               student: z.object({
                 id: z.string(),
                 registration: z.string(),

@@ -1,6 +1,6 @@
 {
-  "id": "471579c4-390a-4d33-a4db-3d3282c52878",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "c3e57803-da24-46cf-a444-78663b1b979f",
+  "prevId": "471579c4-390a-4d33-a4db-3d3282c52878",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -595,7 +595,22 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
+      "uniqueConstraints": {
+        "students_gremio_members_gremio_id_unique": {
+          "name": "students_gremio_members_gremio_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "gremio_id"
+          ]
+        },
+        "students_gremio_members_student_id_unique": {
+          "name": "students_gremio_members_student_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "student_id"
+          ]
+        }
+      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false

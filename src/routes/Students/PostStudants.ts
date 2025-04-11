@@ -4,13 +4,6 @@ import z from "zod";
 import { db } from "../../drizzle/client";
 import { students } from "../../drizzle/schema/students";
 
-const shifts = ["matutino", "vespertino", "noturno", "integral"] as const;
-
-// Cria o enum do Zod
-export const ShiftsEnumZod = z.enum(shifts);
-
-// Tipo TypeScript gerado automaticamente
-export type Role = z.infer<typeof ShiftsEnumZod>;
 
 export const PostStudents: FastifyPluginAsyncZod = async (app) => {
   app.post(
@@ -90,7 +83,7 @@ export const PostStudents: FastifyPluginAsyncZod = async (app) => {
           })
           .returning();
 
-        console.log("Update Estudante", student);
+        console.log("Post Estudante", student);
 
         return reply.status(200).send({ studentId: student.id });
       } catch (error) {

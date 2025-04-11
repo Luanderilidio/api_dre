@@ -2,8 +2,7 @@ import { eq } from "drizzle-orm";
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import z from "zod";
 import { db } from "../../drizzle/client";
-import { students } from "../../drizzle/schema/students";
-import { ShiftsEnumZod } from "./PostStudants";
+import { students } from "../../drizzle/schema/students"; 
 
 export const GetStudentsById: FastifyPluginAsyncZod = async (app) => {
   app.get(
@@ -22,7 +21,7 @@ export const GetStudentsById: FastifyPluginAsyncZod = async (app) => {
             email: z.string().email(),
             series: z.string(),
             shift: z.enum(["matutino", "vespertino", "noturno", "integral"]),
-            url_profile: z.string().nullable().optional(), // <- importante isso
+            url_profile: z.string().nullable().optional(),  
             status: z.boolean(),
             disabled_at: z.date().nullable().optional(),
             created_at: z.date().nullable().optional(),
@@ -48,7 +47,7 @@ export const GetStudentsById: FastifyPluginAsyncZod = async (app) => {
             .status(404)
             .send({ message: "Estudante não encontrado" });
         }
-        console.log(result);
+        console.log("Get Estudante", result);
 
         return reply.status(200).send(result);
       } catch (error) {

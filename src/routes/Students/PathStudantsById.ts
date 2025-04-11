@@ -2,7 +2,7 @@ import { and, eq, not, or } from "drizzle-orm";
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import z from "zod";
 import { db } from "../../drizzle/client";
-import { shiftEnum, students } from "../../drizzle/schema/students";
+import { students } from "../../drizzle/schema/students";
 
 // Define um plugin Fastify para a rota PATCH /students/:id
 export const PathStudentsById: FastifyPluginAsyncZod = async (app) => {
@@ -26,8 +26,8 @@ export const PathStudentsById: FastifyPluginAsyncZod = async (app) => {
           contact: z.string().optional(),
           email: z.string().email().optional(),
           series: z.string().optional(),
-          shifts: shiftEnum,
-          img_profile: z.string().nullable().optional(),
+          shift: z.enum(["matutino", "vespertino", "noturno", "integral"]),
+          url_profile: z.string().nullable().optional(),
           status: z.boolean().optional(),
         }),
 
@@ -58,8 +58,8 @@ export const PathStudentsById: FastifyPluginAsyncZod = async (app) => {
           email,
           contact,
           series,
-          shifts,
-          img_profile,
+          shift,
+          url_profile,
           status,
         } = request.body;
 
@@ -92,8 +92,7 @@ export const PathStudentsById: FastifyPluginAsyncZod = async (app) => {
               .send({ message: `${conflictField} já está cadastrado!` });
           }
         }
-
-        // Realiza a atualização do estudante no banco de dados
+ 
         const [update] = await db
           .update(students)
           .set({
@@ -102,8 +101,8 @@ export const PathStudentsById: FastifyPluginAsyncZod = async (app) => {
             email,
             contact,
             series,
-            shifts,
-            img_profile,
+            shift,
+            url_profile,
             status,
             updated_at: new Date(), // Atualiza a data da última modificação
           })

@@ -62,7 +62,6 @@ export const PostMembersGremio: FastifyPluginAsyncZod = async (app) => {
       try {
         const { gremio_id, student_id, role, status } = request.body;
 
-       
         const gremioExistis = await db
           .select()
           .from(gremios)
@@ -85,6 +84,17 @@ export const PostMembersGremio: FastifyPluginAsyncZod = async (app) => {
           });
         }
 
+        const maxStudentsGremioMembers = await db
+          .select()
+          .from(studentsGremioMembers)
+          .where(eq(studentsGremioMembers.gremio_id, gremio_id));
+
+        if (maxStudentsGremioMembers.length >= 11) {
+          return reply
+            .status(400)
+            .send({ message: "Grêmio já possui 11 membros." });
+        }
+
         const [studentGremioMember] = await db
           .insert(studentsGremioMembers)
           .values({
@@ -94,6 +104,8 @@ export const PostMembersGremio: FastifyPluginAsyncZod = async (app) => {
             status,
           })
           .returning();
+
+          console.log("Post membro", studentGremioMember)
 
         return reply.status(201).send({
           studentsGremioMembersId: studentGremioMember.id,

@@ -3,7 +3,13 @@ import { db } from "../../drizzle/client";
 import { gremios } from "../../drizzle/schema/gremios";
 import { eq } from "drizzle-orm";
 import z from "zod";
-import { interlocutors, schools } from "../../drizzle";
+import {
+  interlocutors,
+  schools,
+  students,
+  studentsGremioMembers,
+} from "../../drizzle";
+import { RoleEnumZod } from "./PostMembersGremio";
 
 export const PathMembersGremioById: FastifyPluginAsyncZod = async (app) => {
   app.patch(
@@ -14,28 +20,16 @@ export const PathMembersGremioById: FastifyPluginAsyncZod = async (app) => {
         summary: "Atualiza um membro do grêmio pelo ID",
         description: "Edita informações de um membro grêmio existente",
         params: z.object({
-          id: z.string().min(6), // já valida que o ID é string válida
+          id: z.string().min(6),
         }),
-        body: z
-          .object({
-            name: z.string().min(1).optional(),
-            status: z.boolean().optional(),
-            url_profile: z.string().nullable().optional(),
-            url_folder: z.string().nullable().optional(),
-            validity_date: z
-              .string()
-              .transform((val) => new Date(val))
-              .optional(),
-            approval_date: z
-              .string()
-              .transform((val) => new Date(val))
-              .optional(),
-            interlocutor_id: z.string().min(6).optional(),
-            school_id: z.string().min(6).optional(),
-          })
-          .refine((data) => Object.keys(data).length > 0, {
-            message: "É necessário informar ao menos um campo para atualizar",
-          }),
+        body: z.object({
+          gremio_id: z.string().min(6).optional(),
+
+          student_id: z.string().min(6).optional(),
+
+          role: RoleEnumZod.optional(),
+          status: z.boolean().optional(),
+        }),
         response: {
           200: z.object({
             message: z.string(),
@@ -51,55 +45,46 @@ export const PathMembersGremioById: FastifyPluginAsyncZod = async (app) => {
     },
     async (request, reply) => {
       const { id } = request.params;
-      const updates = request.body;
+      const { gremio_id, student_id, role, status } = request.body;
 
       try {
-        // Verifica se o grêmio existe
-        const [gremio] = await db
-          .select()
-          .from(gremios)
-          .where(eq(gremios.id, id));
-
-        if (!gremio) {
-          return reply.status(404).send({
-            message: "Grêmio não encontrado.",
-          });
-        }
-
-        // Se school_id foi enviado, verifica se existe
-        if (updates.school_id) {
-          const [school] = await db
+        if (gremio_id) {
+          const [gremio] = await db
             .select()
-            .from(schools)
-            .where(eq(schools.id, updates.school_id));
-          if (!school) {
-            return reply.status(400).send({
-              message: "Escola não encontrada.",
+            .from(gremios)
+            .where(eq(gremios.id, gremio_id));
+
+          if (!gremio) {
+            return reply.status(404).send({
+              message: "Grêmio não encontrado.",
             });
           }
         }
 
-        // Se interlocutor_id foi enviado, verifica se existe
-        if (updates.interlocutor_id) {
-          const [interlocutor] = await db
+        if (student_id) {
+          const [student] = await db
             .select()
-            .from(interlocutors)
-            .where(eq(interlocutors.id, updates.interlocutor_id));
-          if (!interlocutor) {
+            .from(students)
+            .where(eq(students.id, student_id));
+          if (!student) {
             return reply.status(400).send({
-              message: "Interlocutor não encontrado.",
+              message: "Estudante não encontrado.",
             });
           }
         }
 
-        // Faz o update com os campos atualizados + updated_at
-        const [updated] = await db
-          .update(gremios)
+        const [memberGremio] = await db
+          .update(studentsGremioMembers)
           .set({
-            ...updates,
+            gremio_id,
+            student_id,
+            role,
+            status,
           })
-          .where(eq(gremios.id, id))
+          .where(eq(studentsGremioMembers.id, id))
           .returning();
+
+        console.log("update", memberGremio);
 
         return reply.status(200).send({
           message: "Grêmio atualizado com sucesso",

@@ -22,11 +22,11 @@ import { GetInterlocutorsById } from "./routes/Interlocutor/GetInterlocutorsById
 import { PostInterlocutors } from "./routes/Interlocutor/PostInterlocutors";
 import { PathInterlocutorsById } from "./routes/Interlocutor/PathInterlocutorsById";
 import { DeleteInterlocutors } from "./routes/Interlocutor/DeleteInterlocutors";
-import { GetAllStudents } from "./routes/Studants/GetAllStudants";
-import { GetStudentsById } from "./routes/Studants/GetStudantsById";
-import { PostStudents } from "./routes/Studants/PostStudants";
-import { PathStudentsById } from "./routes/Studants/PathStudantsById";
-import { DeleteStudents } from "./routes/Studants/DeleteStudants";
+import { GetAllStudents } from "./routes/Students/GetAllStudants";
+import { GetStudentsById } from "./routes/Students/GetStudantsById";
+import { PostStudents } from "./routes/Students/PostStudants";
+import { PathStudentsById } from "./routes/Students/PathStudantsById";
+import { DeleteStudents } from "./routes/Students/DeleteStudants";
 import { PostGremios } from "./routes/Gremios/PostGremios";
 import { GetAllGremios } from "./routes/Gremios/GetAllGremios";
 import { GetGremioById } from "./routes/Gremios/GetGremiosById";
@@ -34,6 +34,9 @@ import { PatchGremioById } from "./routes/Gremios/PathGremiosById";
 import { DeleteGremios } from "./routes/Gremios/DeleteGremios";
 import { PostMembersGremio } from "./routes/MembersGremio/PostMembersGremio";
 import { GetAllMembersGremio } from "./routes/MembersGremio/GetAllMembersGremio";
+import { GetMembersGremioById } from "./routes/MembersGremio/GetMembersGremioById";
+import { PathMembersGremioById } from "./routes/MembersGremio/PathMembersGremioById";
+import { DeleteMembersGremio } from "./routes/MembersGremio/DeleteMembersGremio";
 
 const app = fastify().withTypeProvider<ZodTypeProvider>();
 
@@ -82,9 +85,11 @@ app.register(GetGremioById);
 app.register(PatchGremioById);
 app.register(DeleteGremios);
 
-app.register(PostMembersGremio);
 app.register(GetAllMembersGremio)
-
+app.register(GetMembersGremioById)
+app.register(PostMembersGremio);
+app.register(PathMembersGremioById);
+app.register(DeleteMembersGremio)
 
 
 app.listen({ port: env.PORT }).then(() => {

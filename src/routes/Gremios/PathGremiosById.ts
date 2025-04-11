@@ -101,6 +101,8 @@ export const PatchGremioById: FastifyPluginAsyncZod = async (app) => {
           .where(eq(gremios.id, id))
           .returning();
 
+          console.log(updated)
+
         return reply.status(200).send({
           message: "Grêmio atualizado com sucesso",
         });

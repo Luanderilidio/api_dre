@@ -3,6 +3,7 @@ import { db } from "../../drizzle/client";
 import { gremios } from "../../drizzle/schema/gremios";
 import { eq } from "drizzle-orm";
 import z from "zod";
+import { studentsGremioMembers } from "../../drizzle";
 
 export const DeleteMembersGremio: FastifyPluginAsyncZod = async (app) => {
   app.delete(
@@ -32,16 +33,16 @@ export const DeleteMembersGremio: FastifyPluginAsyncZod = async (app) => {
       const { id } = request.params;
 
       try {
-        const [deleted] = await db.delete(gremios).where(eq(gremios.id, id)).returning();
+        const [deleted] = await db.delete(studentsGremioMembers).where(eq(studentsGremioMembers.id, id)).returning();
 
         if (!deleted) {
           return reply.status(404).send({
-            message: "Grêmio não encontrado",
+            message: "Membro do grêmio não encontrado",
           });
         }
 
         return reply.status(200).send({
-          message: "Grêmio foi deletado com sucesso",
+          message: "Membro do grêmio foi deletado com sucesso",
         });
       } catch (error) {
         console.error("Erro ao deletar grêmio:", error);

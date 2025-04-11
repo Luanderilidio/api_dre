@@ -32,17 +32,17 @@ export const DeleteStudents: FastifyPluginAsyncZod = async (app) => {
       try {
         const { id } = request.params;
 
-        const deleted = await db
+        const [deleted] = await db
           .delete(students)
-          .where(eq(students.id, id));
+          .where(eq(students.id, id)).returning();
 
-        if (!deleted.count) {
+        if (!deleted) {
           return reply
             .status(404)
             .send({ message: "Estudante não encontrado" });
         }
 
-        console.log("deleted", deleted);
+        console.log("deleted estudante", deleted);
         return reply.status(200).send({ message: "Estudante Deletado!" });
       } catch (error) {
         return reply.status(500).send({ message: "Erro interno do servidor" });
