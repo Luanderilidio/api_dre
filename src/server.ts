@@ -54,8 +54,9 @@ app.register(fastifySwaggerUi, {
   routePrefix: "/docs",
 });
 
-app.register(fastifyCors, {
-  origin: true,
+app.register(fastifyCors, { 
+  origin: "*", 
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
 });
 
 app.setSerializerCompiler(serializerCompiler);

@@ -21,7 +21,6 @@ export const PostStudents: FastifyPluginAsyncZod = async (app) => {
           series: z.string(),
           shift: z.enum(["matutino", "vespertino", "noturno", "integral"]),
           url_profile: z.string().nullable().optional(),
-          status: z.boolean(),
         }),
         response: {
           200: z.object({
@@ -45,8 +44,7 @@ export const PostStudents: FastifyPluginAsyncZod = async (app) => {
           contact,
           series,
           shift,
-          url_profile,
-          status,
+          url_profile
         } = request.body;
 
         // verifica se o email ou a matricula já existem
@@ -78,8 +76,7 @@ export const PostStudents: FastifyPluginAsyncZod = async (app) => {
             contact,
             series,
             shift,
-            url_profile,
-            status,
+            url_profile
           })
           .returning();
 

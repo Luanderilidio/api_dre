@@ -16,9 +16,8 @@ export const PostInterlocutors: FastifyPluginAsyncZod = async (app) => {
           name: z.string().min(1, "Nome é obrigatório"),
           email: z.string().email().nonempty(),
           contact: z.string().nonempty(),
-          status: z.boolean(),
         }),
-        response: {
+        response: { 
           201: z.object({
             interlocutorId: z.string().min(6),
           }),
@@ -30,7 +29,7 @@ export const PostInterlocutors: FastifyPluginAsyncZod = async (app) => {
     },
     async (request, reply) => {
       try {
-        const { name, email, contact, status } = request.body;
+        const { name, email, contact } = request.body;
 
         // verifica se já existe esse email
         const emailExists = await db
@@ -51,8 +50,7 @@ export const PostInterlocutors: FastifyPluginAsyncZod = async (app) => {
           .values({
             name,
             email,
-            contact,
-            status,
+            contact
           })
           .returning();
 

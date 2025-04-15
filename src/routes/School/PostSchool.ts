@@ -12,9 +12,8 @@ export const PostSchools: FastifyPluginAsyncZod = async (app) => {
         summary: "cadastra uma escola",
         description: "descrição da rota",
         body: z.object({
-          name: z.string().min(1, "Nome é obrigatório"),
-          city: z.string().min(1, "Cidade é obrigatória"),
-          status: z.boolean()
+          name: z.string().min(1, "Nome é obrigatório").default('Luander Ilidio'),
+          city: z.string().min(1, "Cidade é obrigatória").default('Cáceres'), 
         }),
         response: {
           201: z.object({
@@ -24,14 +23,13 @@ export const PostSchools: FastifyPluginAsyncZod = async (app) => {
       },
     },
     async (request, reply) => {
-      const { name, city, status } = request.body;
+      const { name, city } = request.body;
 
       const result = await db
         .insert(schools)
         .values({
           name,
-          city,
-          status
+          city
         })
         .returning();
 
