@@ -4,7 +4,6 @@ import z from "zod";
 import { db } from "../../drizzle/client";
 import { students } from "../../drizzle/schema/students";
 
-
 export const PostStudents: FastifyPluginAsyncZod = async (app) => {
   app.post(
     "/students/",
@@ -23,8 +22,20 @@ export const PostStudents: FastifyPluginAsyncZod = async (app) => {
           url_profile: z.string().nullable().optional(),
         }),
         response: {
-          200: z.object({
-            studentId: z.string(),
+          201: z.object({
+            id: z.string(),
+            registration: z.string(),
+            name: z.string(),
+            contact: z.string(),
+            email: z.string().email(),
+            series: z.string(),
+            shift: z.enum(["matutino", "vespertino", "noturno", "integral"]),
+            url_profile: z.string().nullable().optional(),
+            status: z.boolean(),
+            disabled_at: z.date().nullable().optional(),
+            created_at: z.date().nullable().optional(),
+            updated_at: z.date().nullable().optional(),
+            deleted_at: z.date().nullable().optional(),
           }),
           404: z.object({
             message: z.string(),
@@ -44,7 +55,7 @@ export const PostStudents: FastifyPluginAsyncZod = async (app) => {
           contact,
           series,
           shift,
-          url_profile
+          url_profile,
         } = request.body;
 
         // verifica se o email ou a matricula já existem
@@ -76,13 +87,13 @@ export const PostStudents: FastifyPluginAsyncZod = async (app) => {
             contact,
             series,
             shift,
-            url_profile
+            url_profile,
           })
           .returning();
 
         console.log("Post Estudante", student);
 
-        return reply.status(200).send({ studentId: student.id });
+        return reply.status(201).send(student);
       } catch (error) {
         console.log(error);
         return reply

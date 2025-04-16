@@ -17,9 +17,17 @@ export const PostInterlocutors: FastifyPluginAsyncZod = async (app) => {
           email: z.string().email().nonempty(),
           contact: z.string().nonempty(),
         }),
-        response: { 
+        response: {
           201: z.object({
-            interlocutorId: z.string().min(6),
+            id: z.string().min(6),
+            name: z.string().min(1),
+            contact: z.string(),
+            email: z.string().email(),
+            status: z.boolean(),
+            disabled_at: z.date().nullable().optional(),
+            created_at: z.date().nullable().optional(),
+            updated_at: z.date().nullable().optional(),
+            deleted_at: z.date().nullable().optional(),
           }),
           500: z.object({
             message: z.string(),
@@ -37,7 +45,7 @@ export const PostInterlocutors: FastifyPluginAsyncZod = async (app) => {
           .from(interlocutors)
           .where(eq(interlocutors.email, email));
 
-        // se existir, dispara uma mensagem 
+        // se existir, dispara uma mensagem
         if (emailExists.length > 0) {
           return reply.status(400).send({
             message: "Email já está cadastrado.",
@@ -50,7 +58,7 @@ export const PostInterlocutors: FastifyPluginAsyncZod = async (app) => {
           .values({
             name,
             email,
-            contact
+            contact,
           })
           .returning();
 
@@ -59,14 +67,11 @@ export const PostInterlocutors: FastifyPluginAsyncZod = async (app) => {
         console.log(interlocutor);
 
         // envia uma mensagem que o interlocutor foi cadastrado
-        return reply.status(201).send({
-          interlocutorId: interlocutor.id,
-        });
-
+        return reply.status(201).send(interlocutor);
       } catch (error) {
         return reply.status(500).send({
-          message: 'internal error database '
-        })
+          message: "internal error database ",
+        });
       }
     }
   );

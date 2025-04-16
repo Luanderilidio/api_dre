@@ -12,12 +12,22 @@ export const PostSchools: FastifyPluginAsyncZod = async (app) => {
         summary: "cadastra uma escola",
         description: "descrição da rota",
         body: z.object({
-          name: z.string().min(1, "Nome é obrigatório").default('Luander Ilidio'),
-          city: z.string().min(1, "Cidade é obrigatória").default('Cáceres'), 
+          name: z
+            .string()
+            .min(1, "Nome é obrigatório")
+            .default("Luander Ilidio"),
+          city: z.string().min(1, "Cidade é obrigatória").default("Cáceres"),
         }),
         response: {
           201: z.object({
-            schoolId: z.string().min(6),
+            id: z.string().min(6),
+            name: z.string().min(1),
+            city: z.string().min(1),
+            status: z.boolean(),
+            disabled_at: z.date().nullable().optional(),
+            created_at: z.date().nullable().optional(),
+            updated_at: z.date().nullable().optional(),
+            deleted_at: z.date().nullable().optional(),
           }),
         },
       },
@@ -29,15 +39,13 @@ export const PostSchools: FastifyPluginAsyncZod = async (app) => {
         .insert(schools)
         .values({
           name,
-          city
+          city,
         })
         .returning();
 
       const school = result[0];
 
-      return reply.status(201).send({
-        schoolId: school.id,
-      });
+      return reply.status(201).send(school);
     }
   );
 };

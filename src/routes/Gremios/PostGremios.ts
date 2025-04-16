@@ -20,12 +20,10 @@ const roles = [
   "DIRETOR DE SAÚDE E MEIO AMBIENTE",
 ] as const;
 
-// Cria o enum do Zod
+
 export const RoleEnumZod = z.enum(roles);
 
-// Tipo TypeScript gerado automaticamente
 export type Role = z.infer<typeof RoleEnumZod>;
-
 
 export const PostGremios: FastifyPluginAsyncZod = async (app) => {
   app.post(
