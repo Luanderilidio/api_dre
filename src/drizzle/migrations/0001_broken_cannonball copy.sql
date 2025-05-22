@@ -1,2 +1,0 @@
-ALTER TABLE "students_gremio_members" ADD CONSTRAINT "students_gremio_members_gremio_id_unique" UNIQUE("gremio_id");--> statement-breakpoint
-ALTER TABLE "students_gremio_members" ADD CONSTRAINT "students_gremio_members_student_id_unique" UNIQUE("student_id");

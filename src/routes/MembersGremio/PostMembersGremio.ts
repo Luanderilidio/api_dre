@@ -1,4 +1,4 @@
-import { and, eq } from "drizzle-orm";
+import { and, eq, min } from "drizzle-orm";
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import z from "zod";
 import { db } from "../../drizzle/client";
@@ -39,15 +39,22 @@ export const PostMembersGremio: FastifyPluginAsyncZod = async (app) => {
           "Cria um novo membro do grêmio vinculado a uma escola e interlocutor",
         body: z.object({
           gremio_id: z.string().min(6),
-
           student_id: z.string().min(6),
-
           role: RoleEnumZod,
           status: z.boolean(),
         }),
         response: {
           201: z.object({
-            studentsGremioMembersId: z.string(),
+            id: z.string().min(6),
+            role: RoleEnumZod,
+            status: z.boolean(),
+            gremio_id: z.string().min(6),
+            student_id: z.string().min(6),
+
+            disabled_at: z.date().nullable().optional(),
+            created_at: z.date().nullable().optional(),
+            updated_at: z.date().nullable().optional(),
+            deleted_at: z.date().nullable().optional(),
           }),
           400: z.object({
             message: z.string(),
@@ -105,11 +112,9 @@ export const PostMembersGremio: FastifyPluginAsyncZod = async (app) => {
           })
           .returning();
 
-          console.log("Post membro", studentGremioMember)
+        console.log("Post membro", studentGremioMember);
 
-        return reply.status(201).send({
-          studentsGremioMembersId: studentGremioMember.id,
-        });
+        return reply.status(201).send(studentGremioMember);
       } catch (error) {
         console.error("Erro ao criar Membro:", error);
         return reply

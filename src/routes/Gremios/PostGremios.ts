@@ -20,7 +20,6 @@ const roles = [
   "DIRETOR DE SAÚDE E MEIO AMBIENTE",
 ] as const;
 
-
 export const RoleEnumZod = z.enum(roles);
 
 export type Role = z.infer<typeof RoleEnumZod>;
@@ -32,10 +31,11 @@ export const PostGremios: FastifyPluginAsyncZod = async (app) => {
       schema: {
         tags: ["gremios"],
         summary: "Cadastra um Grêmio",
-        description: "Cria um novo grêmio vinculado a uma escola e interlocutor",
+        description:
+          "Cria um novo grêmio vinculado a uma escola e interlocutor",
         body: z.object({
           name: z.string().min(1),
-          status: z.boolean(),
+          status: z.boolean().default(true),
           url_profile: z.string().nullable().optional(),
           url_folder: z.string().nullable().optional(),
           validity_date: z.string().transform((val) => new Date(val)),
@@ -44,8 +44,8 @@ export const PostGremios: FastifyPluginAsyncZod = async (app) => {
           interlocutor_id: z.string().min(6),
         }),
         response: {
-          201: z.object({ 
-            gremioId: z.string(),
+          201: z.object({
+            gremio_id: z.string(),
           }),
           400: z.object({
             message: z.string(),
@@ -81,7 +81,6 @@ export const PostGremios: FastifyPluginAsyncZod = async (app) => {
           });
         }
 
-        
         const interlocutor = await db
           .select()
           .from(interlocutors)
@@ -118,8 +117,10 @@ export const PostGremios: FastifyPluginAsyncZod = async (app) => {
           })
           .returning();
 
+          console.log(gremio)
+
         return reply.status(201).send({
-          gremioId: gremio.id,
+          gremio_id: gremio.id
         });
       } catch (error) {
         console.error("Erro ao criar grêmio:", error);

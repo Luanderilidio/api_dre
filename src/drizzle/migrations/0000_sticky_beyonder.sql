@@ -68,7 +68,8 @@ CREATE TABLE "students_gremio_members" (
 	"disabled_at" timestamp,
 	"created_at" timestamp DEFAULT now(),
 	"updated_at" timestamp,
-	"deleted_at" timestamp
+	"deleted_at" timestamp,
+	CONSTRAINT "students_gremio_members_student_id_unique" UNIQUE("student_id")
 );
 --> statement-breakpoint
 ALTER TABLE "gremios" ADD CONSTRAINT "gremios_school_id_school_id_fk" FOREIGN KEY ("school_id") REFERENCES "public"."school"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint

@@ -6,7 +6,7 @@ import { students } from "../../drizzle/schema/students";
 
 export const PostStudents: FastifyPluginAsyncZod = async (app) => {
   app.post(
-    "/students/",
+    "/students",
     {
       schema: {
         tags: ["students"],
@@ -77,7 +77,7 @@ export const PostStudents: FastifyPluginAsyncZod = async (app) => {
           return reply.status(400).send({ message: "Estudante já cadastrado" });
         }
 
-        // Atualiza o estudante se tudo existiver ok
+        // Atualiza o eartudante se tudo existiver ok
         const [student] = await db
           .insert(students)
           .values({

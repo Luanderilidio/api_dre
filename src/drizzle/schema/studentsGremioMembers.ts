@@ -21,38 +21,47 @@ export const roleEnum = pgEnum("role", [
   "DIRETOR DE SAÚDE E MEIO AMBIENTE",
 ]);
 
-export const studentsGremioMembers = pgTable("students_gremio_members", {
-  id: text("id")
-    .primaryKey()
-    .$defaultFn(() => generateShortId()),
+export const studentsGremioMembers = pgTable(
+  "students_gremio_members",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => generateShortId()),
 
-  gremio_id: text("gremio_id")
-    .notNull().unique()
-    .references(() => gremios.id, { onDelete: "cascade" }),
+    gremio_id: text("gremio_id")
+      .notNull()
+      .references(() => gremios.id, { onDelete: "cascade" }),
 
-  student_id: text("student_id")
-    .notNull()
-    .unique()
-    .references(() => students.id, { onDelete: "cascade" }),
+    student_id: text("student_id")
+      .notNull()
+      .unique()
+      .references(() => students.id, { onDelete: "cascade" }),
 
-  role: roleEnum("role").notNull(),
-  status: boolean("status").default(true).notNull(),
+    role: roleEnum("role").notNull(),
+    status: boolean("status").default(true).notNull(),
 
-
-  disabled_at: timestamp("disabled_at"),
-  created_at: timestamp("created_at").defaultNow(),
-  updated_at: timestamp("updated_at"),
-  deleted_at: timestamp("deleted_at"),
-
-
-}, (table) => {
-  return {
-    createdDateIdx: index("gremio_members_created_date_idx").on(table.created_at),
-    disabledDateIdx: index("gremio_members_disabled_date_idx").on(table.disabled_at),
-    updatedDateIdx: index("gremio_members_updated_date_idx").on(table.updated_at),
-    deletedDateIdx: index("gremio_members_deleted_date_idx").on(table.deleted_at),
+    disabled_at: timestamp("disabled_at"),
+    created_at: timestamp("created_at").defaultNow(),
+    updated_at: timestamp("updated_at"),
+    deleted_at: timestamp("deleted_at"),
+  },
+  (table) => {
+    return {
+      createdDateIdx: index("gremio_members_created_date_idx").on(
+        table.created_at
+      ),
+      disabledDateIdx: index("gremio_members_disabled_date_idx").on(
+        table.disabled_at
+      ),
+      updatedDateIdx: index("gremio_members_updated_date_idx").on(
+        table.updated_at
+      ),
+      deletedDateIdx: index("gremio_members_deleted_date_idx").on(
+        table.deleted_at
+      ),
+    };
   }
-} );
+);
 
 // Relacionamentos
 export const studentsGremioMembersRelations = relations(
