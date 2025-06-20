@@ -2,6 +2,7 @@ import { boolean } from "drizzle-orm/pg-core";
 import { pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import { generateShortId } from "../../utils/generate-id";
 
+
 export const schools = pgTable("school", {
   id: text("id")
     .primaryKey()

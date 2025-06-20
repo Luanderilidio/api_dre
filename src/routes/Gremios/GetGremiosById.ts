@@ -12,6 +12,7 @@ export const GetGremioById: FastifyPluginAsyncZod = async (app) => {
         tags: ["gremios"],
         summary: "Busca um grêmio pelo ID",
         description: "Retorna um grêmio com seus relacionamentos",
+        
         params: z.object({
           id: z.string().min(6),
         }),

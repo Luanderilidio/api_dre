@@ -15,7 +15,7 @@ export const GetMembersGremioById: FastifyPluginAsyncZod = async (app) => {
         description: "Retorna um membro do grêmio com seus relacionamentos",
         params: z.object({
           id: z.string().min(6),
-        }),
+        }), 
         response: {
           200: z.object({
             id: z.string().min(6),
