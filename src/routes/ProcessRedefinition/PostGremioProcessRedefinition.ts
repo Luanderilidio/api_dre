@@ -2,43 +2,57 @@ import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import z from "zod";
 import { db } from "../../drizzle/client";
 import { schools } from "../../drizzle/schema/schools";
+import {
+  MessageSchema,
+  ProcessRedefinitionBaseSchema,
+} from "../../utils/SchemasRoutes";
+import { gremioProcessRedefinition } from "../../drizzle/schema/gremioProcessRedefinition";
 
-export const PostGremioProcessRedefinition: FastifyPluginAsyncZod = async (app) => {
+export const PostGremioProcessRedefinition: FastifyPluginAsyncZod = async (
+  app
+) => {
   app.post(
     "/gremio-process-redefinition",
     {
       schema: {
         tags: ["process-redefinition"],
         summary: "Cadastra um Processo de Redefinição do Grêmio",
-        description: "descrição da rota",
-        body: z.object({
-
-          gremio_id: z.string().min(6),
-          status: z.boolean(),
-          observation: z.string(),
-          year: z.number(),
-
-          disabled_at: z.date().nullable().optional(),
-          created_at: z.date().nullable().optional(),
-          updated_at: z.date().nullable().optional(),
-          deleted_at: z.date().nullable().optional(),
-        }),
+        description:
+          "Essa rota cadastra um novo processo de redefinição do Grêmio",
+        body: ProcessRedefinitionBaseSchema,
         response: {
-          201: z.object({
-            id: z.string().min(6),
-            name: z.string().min(1),
-            city: z.string().min(1),
-            status: z.boolean(),
-            disabled_at: z.date().nullable().optional(),
-            created_at: z.date().nullable().optional(),
-            updated_at: z.date().nullable().optional(),
-            deleted_at: z.date().nullable().optional(),
-          }),
+          201: MessageSchema,
+          400: MessageSchema,
+          500: MessageSchema,
         },
       },
     },
     async (request, reply) => {
-      console.log("hahaha")
+      const body = ProcessRedefinitionBaseSchema.parse(request.body);
+
+      try {
+        const result = await db
+          .insert(gremioProcessRedefinition)
+          .values(body)
+          .returning();
+        console.log(result);
+
+        return reply.status(201).send({
+          message: "cadastrado com sucesso",
+        });
+      } catch (error) {
+        if (error instanceof z.ZodError) {
+          return reply.status(400).send({
+            message: "Invalid request body",
+          });
+        }
+
+        console.log(error);
+
+        return reply.status(500).send({
+          message: "Internal server error",
+        });
+      }
     }
   );
 };

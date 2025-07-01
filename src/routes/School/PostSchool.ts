@@ -43,6 +43,8 @@ export const PostSchools: FastifyPluginAsyncZod = async (app) => {
         })
         .returning();
 
+        
+
       const school = result[0];
 
       return reply.status(201).send(school);
