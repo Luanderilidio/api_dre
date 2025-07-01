@@ -39,8 +39,9 @@ import { PathMembersGremioById } from "./routes/MembersGremio/PathMembersGremioB
 import { DeleteMembersGremio } from "./routes/MembersGremio/DeleteMembersGremio";
 import { PostGremioProcessRedefinition } from "./routes/ProcessRedefinition/PostGremioProcessRedefinition";
 import { GetGremioProcessRedefinition } from "./routes/ProcessRedefinition/GetGremioProcessRedefinition";
-import { PathGremioProcessRedefinition } from "./routes/ProcessRedefinition/PathGremioProcessRedefinition copy";
+import { PathGremioProcessRedefinition } from "./routes/ProcessRedefinition/PathGremioProcessRedefinition";
 import { DeleteGremioProcessRedefinition } from "./routes/ProcessRedefinition/DeleteGremioProcessRedefinition";
+import { PostGremioProcessRedefinitionStages } from "./routes/RedefinitionStages/PostGremioProcessRedefinitionStages";
 
 
 const app = fastify().withTypeProvider<ZodTypeProvider>();
@@ -101,6 +102,9 @@ app.register(PostGremioProcessRedefinition)
 app.register(GetGremioProcessRedefinition)
 app.register(PathGremioProcessRedefinition)
 app.register(DeleteGremioProcessRedefinition)
+
+
+app.register(PostGremioProcessRedefinitionStages)
 
 app.listen({ port: env.PORT }).then(() => {
   console.log("🚀  HTTP server running! ✨");

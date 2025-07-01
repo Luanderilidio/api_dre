@@ -39,18 +39,19 @@ export const TimestampsMetadata = z.object({
   disabled_at: z.date().nullable(),
 });
 
-const GremioProcessRedefinitionStagesBaseSchema = z.object({
-  gremio_process_id: z.string().min(6),
-  order: z.number(),
+export const GremioProcessRedefinitionStagesBaseSchema = z.object({
+  gremio_process_id: z.string().min(6), 
   stage: StagesEnumZod,
-  started_at: z.date(),
-  finished_at: z.date(),
+  started_at: z.coerce.date(),
+  finished_at: z.coerce.date(),
   observation: z.string(),
 });
+
 
 const GetGremioProcessRedefinitionStagesSchema = z
   .object({
     id: z.string().min(6),
+    order: z.number(),
   })
   .merge(GremioProcessRedefinitionStagesBaseSchema)
   .merge(TimestampsMetadata);
