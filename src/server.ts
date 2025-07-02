@@ -42,7 +42,9 @@ import { GetGremioProcessRedefinition } from "./routes/ProcessRedefinition/GetGr
 import { PathGremioProcessRedefinition } from "./routes/ProcessRedefinition/PathGremioProcessRedefinition";
 import { DeleteGremioProcessRedefinition } from "./routes/ProcessRedefinition/DeleteGremioProcessRedefinition";
 import { PostGremioProcessRedefinitionStages } from "./routes/RedefinitionStages/PostGremioProcessRedefinitionStages";
-
+import { GetGremioProcessRedefinitionStages } from "./routes/RedefinitionStages/GetGremioProcessRedefinitionStages";
+import { PathGremioProcessRedefinitionStages } from "./routes/RedefinitionStages/PathGremioProcessRedefinitionStages";
+import { DeleteGremioProcessRedefinitionStages } from "./routes/RedefinitionStages/DeleteGremioProcessRedefinitionStages";
 
 const app = fastify().withTypeProvider<ZodTypeProvider>();
 
@@ -60,8 +62,8 @@ app.register(fastifySwaggerUi, {
   routePrefix: "/docs",
 });
 
-app.register(fastifyCors, { 
-  origin: "*", 
+app.register(fastifyCors, {
+  origin: "*",
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
 });
 
@@ -92,19 +94,21 @@ app.register(GetGremioById);
 app.register(PatchGremioById);
 app.register(DeleteGremios);
 
-app.register(GetAllMembersGremio)
-app.register(GetMembersGremioById)
+app.register(GetAllMembersGremio);
+app.register(GetMembersGremioById);
 app.register(PostMembersGremio);
 app.register(PathMembersGremioById);
-app.register(DeleteMembersGremio)
+app.register(DeleteMembersGremio);
 
-app.register(PostGremioProcessRedefinition)
-app.register(GetGremioProcessRedefinition)
-app.register(PathGremioProcessRedefinition)
-app.register(DeleteGremioProcessRedefinition)
+app.register(PostGremioProcessRedefinition);
+app.register(GetGremioProcessRedefinition);
+app.register(PathGremioProcessRedefinition);
+app.register(DeleteGremioProcessRedefinition);
 
-
-app.register(PostGremioProcessRedefinitionStages)
+app.register(PostGremioProcessRedefinitionStages);
+app.register(GetGremioProcessRedefinitionStages);
+app.register(PathGremioProcessRedefinitionStages);
+app.register(DeleteGremioProcessRedefinitionStages);
 
 app.listen({ port: env.PORT }).then(() => {
   console.log("🚀  HTTP server running! ✨");

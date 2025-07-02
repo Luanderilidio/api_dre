@@ -4,6 +4,7 @@ import { db } from "../../drizzle/client";
 import { schools } from "../../drizzle/schema/schools";
 import {
   MessageSchema,
+  MessageWithIdSchema,
   ProcessRedefinitionBaseSchema,
 } from "../../utils/SchemasRoutes";
 import { gremioProcessRedefinition } from "../../drizzle/schema/gremioProcessRedefinition";
@@ -21,7 +22,7 @@ export const PostGremioProcessRedefinition: FastifyPluginAsyncZod = async (
           "Essa rota cadastra um novo processo de redefinição do Grêmio",
         body: ProcessRedefinitionBaseSchema,
         response: {
-          201: MessageSchema,
+          201: MessageWithIdSchema,
           400: MessageSchema,
           500: MessageSchema,
         },
@@ -39,6 +40,7 @@ export const PostGremioProcessRedefinition: FastifyPluginAsyncZod = async (
 
         return reply.status(201).send({
           message: "cadastrado com sucesso",
+          id: result[0].id
         });
       } catch (error) {
         if (error instanceof z.ZodError) {

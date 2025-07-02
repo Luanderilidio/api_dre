@@ -2,6 +2,7 @@ import { pgTable, text, timestamp, serial, pgEnum } from "drizzle-orm/pg-core";
 import { generateShortId } from "../../utils/generate-id";
 import { gremioProcessRedefinition } from "./gremioProcessRedefinition";
 import { relations } from "drizzle-orm";
+import { boolean } from "drizzle-orm/pg-core";
 
 export const StagesEnum = pgEnum("stages", [
   "Comissão Pró-Grêmio",
@@ -24,6 +25,7 @@ export const gremioProcessRedefinitionStages = pgTable(
       .notNull(),
     order: serial("order"),
     stage: StagesEnum("stage").notNull(),
+    status: boolean("status").notNull(),
 
     started_at: timestamp("started_at").notNull(),
     finished_at: timestamp("finished_at").notNull(),

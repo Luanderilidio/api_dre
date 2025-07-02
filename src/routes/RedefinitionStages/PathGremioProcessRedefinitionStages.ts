@@ -10,7 +10,7 @@ import {
 import { gremioProcessRedefinition } from "../../drizzle/schema/gremioProcessRedefinition";
 import { gremioProcessRedefinitionStages } from "../../drizzle";
 
-export const PathGremioProcessRedefinition: FastifyPluginAsyncZod = async (
+export const PathGremioProcessRedefinitionStages: FastifyPluginAsyncZod = async (
   app
 ) => {
   app.patch(

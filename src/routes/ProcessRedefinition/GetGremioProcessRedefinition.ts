@@ -23,6 +23,7 @@ export const GetGremioProcessRedefinition: FastifyPluginAsyncZod = async (
         querystring: z.object({
           filter: z
             .enum([
+              "gremio_id",
               "id_with_stages",
               "id_no_stages",
               "all_with_stages",
@@ -30,6 +31,7 @@ export const GetGremioProcessRedefinition: FastifyPluginAsyncZod = async (
             ])
             .describe("Escolha o tipo de filtro")
             .optional(),
+          gremio_id: z.string().min(6).optional(),
           gremio_process_id: z.string().min(6).optional(),
         }),
         response: {
@@ -44,7 +46,7 @@ export const GetGremioProcessRedefinition: FastifyPluginAsyncZod = async (
       },
     },
     async (request, reply) => {
-      const { filter, gremio_process_id } = request.query;
+      const { filter, gremio_process_id, gremio_id } = request.query;
 
       // verifica se gremio_process_id existe
       if (gremio_process_id) {
@@ -60,6 +62,31 @@ export const GetGremioProcessRedefinition: FastifyPluginAsyncZod = async (
       }
 
       switch (filter) {
+        case "gremio_id": {
+          try {
+            const filter_with_gremio_id =
+              await db.query.gremioProcessRedefinition.findFirst({
+                where: eq(
+                  gremioProcessRedefinition.gremio_id,
+                  gremio_id!
+                ),
+                with: { stages: true },
+              });
+
+            return reply.status(200).send(filter_with_gremio_id);
+          } catch (error) {
+            if (error instanceof z.ZodError) {
+              return reply.status(400).send({
+                message: "Invalid request query",
+              });
+            }
+            console.log(error);
+
+            return reply.status(500).send({
+              message: "Internal server error",
+            });
+          }
+        }
         case "id_with_stages":
           try {
             const result_id_with_stages =

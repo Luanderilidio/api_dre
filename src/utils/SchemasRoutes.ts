@@ -42,13 +42,14 @@ export const TimestampsMetadata = z.object({
 export const GremioProcessRedefinitionStagesBaseSchema = z.object({
   gremio_process_id: z.string().min(6), 
   stage: StagesEnumZod,
+  status: z.boolean(),
   started_at: z.coerce.date(),
   finished_at: z.coerce.date(),
   observation: z.string(),
 });
 
 
-const GetGremioProcessRedefinitionStagesSchema = z
+export const GetGremioProcessRedefinitionStagesSchema = z
   .object({
     id: z.string().min(6),
     order: z.number(),
@@ -81,3 +82,10 @@ export const GetProcessRedefinitionWithStagesSchema = z
 export const MessageSchema = z.object({
   message: z.string(),
 });
+
+export const MessageWithIdSchema = z.object({
+  message: z.string(),
+  id: z.string().min(6)
+});
+
+
