@@ -3,6 +3,7 @@ import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import z from "zod";
 import { db } from "../../drizzle/client";
 import { students } from "../../drizzle/schema/students";
+import { MessageSchema } from "../../utils/SchemasRoutes";
 
 export const DeleteStudents: FastifyPluginAsyncZod = async (app) => {
   app.delete(
@@ -16,15 +17,9 @@ export const DeleteStudents: FastifyPluginAsyncZod = async (app) => {
           id: z.string().min(6),
         }),
         response: {
-          200: z.object({
-            message: z.string(),
-          }),
-          404: z.object({
-            message: z.string(),
-          }),
-          500: z.object({
-            message: z.string(),
-          }),
+          200: MessageSchema,
+          404: MessageSchema,
+          500: MessageSchema,
         },
       },
     },
@@ -34,7 +29,8 @@ export const DeleteStudents: FastifyPluginAsyncZod = async (app) => {
 
         const [deleted] = await db
           .delete(students)
-          .where(eq(students.id, id)).returning();
+          .where(eq(students.id, id))
+          .returning();
 
         if (!deleted) {
           return reply
@@ -42,7 +38,6 @@ export const DeleteStudents: FastifyPluginAsyncZod = async (app) => {
             .send({ message: "Estudante não encontrado" });
         }
 
-        console.log("deleted estudante", deleted);
         return reply.status(200).send({ message: "Estudante Deletado!" });
       } catch (error) {
         return reply.status(500).send({ message: "Erro interno do servidor" });

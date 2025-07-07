@@ -39,15 +39,54 @@ export const TimestampsMetadata = z.object({
   disabled_at: z.date().nullable(),
 });
 
+export const SchoolBaseSchema = z
+  .object({
+    id: z.string().min(6),
+    name: z.string().min(1),
+    city: z.string().min(1),
+    status: z.boolean().default(true),
+  })
+  .merge(TimestampsMetadata);
+
+export const SchoolCreateSchema = SchoolBaseSchema.omit({
+  id: true,
+});
+
+export const SchoolUpdateSchema = SchoolCreateSchema.partial();
+
+export const AllSchoolSchema = z.array(SchoolBaseSchema);
+
+// SCHEMA STUDENTS ===========================================
+
+export const StudentBaseSchema = z.object({
+  id: z.string().min(6),
+  name: z.string().min(1),
+  registration: z.string(),
+  contact: z.string(),
+  email: z.string().email(),
+  series: z.string(),
+  shift: z.enum(["matutino", "vespertino", "noturno", "integral"]),
+  url_profile: z.string().nullable(),
+});
+
+export const StudentCreateSchema = StudentBaseSchema.omit({
+  id: true,
+});
+
+export const StudentUpdateSchema = StudentCreateSchema.partial();
+
+export const AllStudentSchema = z.array(StudentBaseSchema);
+
+
+
 export const GremioProcessRedefinitionStagesBaseSchema = z.object({
-  gremio_process_id: z.string().min(6), 
+  gremio_process_id: z.string().min(6),
   stage: StagesEnumZod,
   status: z.boolean(),
   started_at: z.coerce.date(),
   finished_at: z.coerce.date(),
   observation: z.string(),
 });
-
 
 export const GetGremioProcessRedefinitionStagesSchema = z
   .object({
@@ -85,7 +124,41 @@ export const MessageSchema = z.object({
 
 export const MessageWithIdSchema = z.object({
   message: z.string(),
-  id: z.string().min(6)
+  id: z.string().min(6),
 });
 
+export const ZodIssueSchema: z.ZodType<any> = z.lazy(() =>
+  z.object({
+    code: z.string(),
+    path: z.array(z.union([z.string(), z.number()])),
+    message: z.string(),
+    expected: z.any().optional(),
+    received: z.any().optional(),
+    validation: z
+      .union([
+        z.literal("email"),
+        z.literal("url"),
+        z.literal("uuid"),
+        z.literal("regex"),
+      ])
+      .optional(),
+    minimum: z.number().optional(),
+    maximum: z.number().optional(),
+    inclusive: z.boolean().optional(),
+    exact: z.boolean().optional(),
+    type: z.string().optional(),
+    keys: z.array(z.string()).optional(),
+    unionErrors: z
+      .array(
+        z.object({
+          issues: z.array(ZodIssueSchema),
+        })
+      )
+      .optional(),
+  })
+);
 
+export const ValidationErrorSchema = z.object({
+  message: z.string(),
+  errors: z.array(ZodIssueSchema),
+});

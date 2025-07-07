@@ -3,6 +3,7 @@ import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import z from "zod";
 import { db } from "../../drizzle/client";
 import { schools } from "../../drizzle/schema/schools";
+import { MessageSchema, SchoolUpdateSchema, ValidationErrorSchema } from "../../utils/SchemasRoutes";
 
 export const PathSchoolsById: FastifyPluginAsyncZod = async (app) => {
   app.patch(
@@ -15,18 +16,12 @@ export const PathSchoolsById: FastifyPluginAsyncZod = async (app) => {
         params: z.object({
           id: z.string().min(6),
         }),
-        body: z.object({
-          name: z.string().optional(),
-          city: z.string().optional(),
-          status: z.boolean().optional(),
-        }),
+        body: SchoolUpdateSchema,
         response: {
-          200: z.object({
-            message: z.string(),
-          }),
-          404: z.object({
-            message: z.string(),
-          }),
+          200: MessageSchema,
+          400: ValidationErrorSchema,
+          404: MessageSchema,
+          500: MessageSchema,
         },
       },
     },
@@ -34,26 +29,30 @@ export const PathSchoolsById: FastifyPluginAsyncZod = async (app) => {
       try {
         const { id } = request.params;
 
-        const { name, city, status } = request.body;
+
+        const body = SchoolUpdateSchema.partial().parse(request.body); 
 
         const update = await db
           .update(schools)
-          .set({
-            name,
-            city,
-            status,
-          })
+          .set(body)
           .where(eq(schools.id, id))
           .returning();
+
         if (!update) {
-          return reply
-            .status(404)
-            .send({ message: "Escola não encontrada" });
+          return reply.status(404).send({ message: "Escola não existe!" });
         }
-        console.log("Escola", update);
-        return reply.status(200).send({ message: "Escola atualizada!" });
+
+        return reply
+          .status(200)
+          .send({ message: "Escola atualizada com sucesso!" });
       } catch (error) {
-        console.log("erro ao atualizar Escola:", error);
+        if (error instanceof z.ZodError) {
+          return reply
+            .status(400)
+            .send({ message: "invalid request body!", errors: error.errors });
+        }
+        console.log(error);
+        return reply.status(500).send({ message: "internal server error" });
       }
     }
   );

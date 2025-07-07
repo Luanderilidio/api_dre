@@ -3,6 +3,7 @@ import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import z from "zod";
 import { db } from "../../drizzle/client";
 import { students } from "../../drizzle/schema/students"; 
+import { MessageSchema, StudentBaseSchema } from "../../utils/SchemasRoutes";
 
 export const GetStudentsById: FastifyPluginAsyncZod = async (app) => {
   app.get(
@@ -13,29 +14,17 @@ export const GetStudentsById: FastifyPluginAsyncZod = async (app) => {
         summary: "Obtém um estudante pelo ID",
         params: z.object({ id: z.string().min(6) }),
         response: {
-          200: z.object({
-            id: z.string(),
-            registration: z.string(),
-            name: z.string(),
-            contact: z.string(),
-            email: z.string().email(),
-            series: z.string(),
-            shift: z.enum(["matutino", "vespertino", "noturno", "integral"]),
-            url_profile: z.string().nullable().optional(),  
-            status: z.boolean(),
-            disabled_at: z.date().nullable().optional(),
-            created_at: z.date().nullable().optional(),
-            updated_at: z.date().nullable().optional(),
-            deleted_at: z.date().nullable().optional(),
-          }),
-          404: z.object({ message: z.string() }),
-          500: z.object({ message: z.string() }),
+          200: StudentBaseSchema,
+          404: MessageSchema,
+          500: MessageSchema,
         },
       },
     },
     async (request, reply) => {
+      const { id } = request.params;
+
+
       try {
-        const { id } = request.params;
         const [result] = await db
           .select()
           .from(students)
@@ -46,8 +35,7 @@ export const GetStudentsById: FastifyPluginAsyncZod = async (app) => {
           return reply
             .status(404)
             .send({ message: "Estudante não encontrado" });
-        }
-        console.log("Get Estudante", result);
+        } 
 
         return reply.status(200).send(result);
       } catch (error) {

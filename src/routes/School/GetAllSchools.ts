@@ -4,6 +4,11 @@ import { db } from "../../drizzle/client";
 import { schools } from "../../drizzle/schema/schools";
 import { gremios } from "../../drizzle";
 import { notInArray } from "drizzle-orm";
+import {
+  AllSchoolSchema,
+  MessageSchema,
+  ValidationErrorSchema,
+} from "../../utils/SchemasRoutes";
 
 export const GetAllSchools: FastifyPluginAsyncZod = async (app) => {
   app.get(
@@ -17,66 +22,69 @@ export const GetAllSchools: FastifyPluginAsyncZod = async (app) => {
           free: z
             .enum(["true"])
             .optional()
-            .describe(
-              "Filtra apenas as escolas que não estão tem um grêmio"
-            ),
+            .describe("Filtra apenas as escolas que não estão tem um grêmio"),
         }),
         response: {
-          200: z.array(
-              z.object({
-                id: z.string().min(6),
-                name: z.string().min(1),
-                city: z.string().min(1),
-                status: z.boolean(),
-                created_at: z.date().nullable().optional(),
-                updated_at: z.date().nullable().optional(),
-                deleted_at: z.date().nullable().optional(),
-                disabled_at: z.date().nullable().optional(),
-              })
-          ),
-          404: z.object({
-            message: z.string(),
-          }),
+          200: AllSchoolSchema,
+          400: ValidationErrorSchema,
+          404: MessageSchema,
+          500: MessageSchema,
         },
       },
     },
     async (request, reply) => {
       const { free } = request.query;
 
-      if (free === "true") {
-        try {
-          const usedSchools = await db
-            .select({ id: gremios.school_id })
-            .from(gremios);
+      switch (free) {
+        case "true":
+          try {
+            const usedSchools = await db
+              .select({ id: gremios.school_id })
+              .from(gremios);
 
-          const usedIds = usedSchools.map((schools) => schools.id);
+            const usedIds = usedSchools.map((schools) => schools.id);
 
-          const available = await db
-            .select()
-            .from(schools)
-            .where(notInArray(schools.id, usedIds));
+            const availableSchools = await db
+              .select()
+              .from(schools)
+              .where(notInArray(schools.id, usedIds));
 
-        
-          if (available.length === 0) {
-            return reply.status(404).send({
-              message: "Não foi encontrado nenhuma disponível",
-            });
+            if (availableSchools.length === 0) {
+              return reply.status(404).send({
+                message: "Não foi encontrado nenhuma escola disponível",
+              });
+            }
+            return reply.status(200).send(availableSchools);
+          } catch (error) {
+            if (error instanceof z.ZodError) {
+              return reply.status(400).send({
+                message: "invalid request body",
+                errors: error.errors,
+              });
+            }
+            console.error(error);
+            return reply.status(500).send({ message: "internal server error" });
           }
-          return reply.status(200).send(available);
-        } catch (error) {
-          console.error("Erro ao buscar escolas disponíveis", error);
-          return reply
-            .status(500)
-            .send({ message: "Erro interno do servidor" });
-        }
-      }
-      try {
-        const result = await db.select().from(schools);
-        console.log("schools", result);
-        return reply.status(200).send(result);
-      } catch (error) {
-        console.error("Erro ao buscar escolas disponíveis", error);
-        return reply.status(500).send({ message: "Erro interno do servidor" });
+
+        default:
+          try {
+            const result = await db.select().from(schools);
+            if (!result) {
+              return reply.status(404).send({
+                message: "nenhuma escola encontrada",
+              });
+            }
+            return reply.status(200).send(result);
+          } catch (error) {
+            if (error instanceof z.ZodError) {
+              return reply.status(400).send({
+                message: "invalid request body",
+                errors: error.errors,
+              });
+            }
+            console.error(error);
+            return reply.status(500).send({ message: "internal server error" });
+          }
       }
     }
   );

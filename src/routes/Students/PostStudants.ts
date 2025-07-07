@@ -3,6 +3,12 @@ import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import z from "zod";
 import { db } from "../../drizzle/client";
 import { students } from "../../drizzle/schema/students";
+import {
+  MessageSchema,
+  StudentBaseSchema,
+  StudentCreateSchema,
+  ValidationErrorSchema,
+} from "../../utils/SchemasRoutes";
 
 export const PostStudents: FastifyPluginAsyncZod = async (app) => {
   app.post(
@@ -12,52 +18,18 @@ export const PostStudents: FastifyPluginAsyncZod = async (app) => {
         tags: ["students"],
         summary: "Cadastra um estudante",
         description: "descrição da rota",
-        body: z.object({
-          registration: z.string(),
-          name: z.string().min(1),
-          contact: z.string(),
-          email: z.string().email(),
-          series: z.string(),
-          shift: z.enum(["matutino", "vespertino", "noturno", "integral"]),
-          url_profile: z.string().nullable().optional(),
-        }),
+        body: StudentCreateSchema,
         response: {
-          201: z.object({
-            id: z.string(),
-            registration: z.string(),
-            name: z.string(),
-            contact: z.string(),
-            email: z.string().email(),
-            series: z.string(),
-            shift: z.enum(["matutino", "vespertino", "noturno", "integral"]),
-            url_profile: z.string().nullable().optional(),
-            status: z.boolean(),
-            disabled_at: z.date().nullable().optional(),
-            created_at: z.date().nullable().optional(),
-            updated_at: z.date().nullable().optional(),
-            deleted_at: z.date().nullable().optional(),
-          }),
-          404: z.object({
-            message: z.string(),
-          }),
-          500: z.object({
-            message: z.string(),
-          }),
+          201: MessageSchema,
+          400: z.union([ValidationErrorSchema, MessageSchema]),
+          404: MessageSchema,
+          500: MessageSchema,
         },
       },
     },
     async (request, reply) => {
+      const body = StudentCreateSchema.parse(request.body);
       try {
-        const {
-          registration,
-          name,
-          email,
-          contact,
-          series,
-          shift,
-          url_profile,
-        } = request.body;
-
         // verifica se o email ou a matricula já existem
         const existingEmailOrRegistration = await db
           .select()
@@ -65,8 +37,8 @@ export const PostStudents: FastifyPluginAsyncZod = async (app) => {
           .where(
             and(
               or(
-                eq(students.email, email),
-                eq(students.registration, registration)
+                eq(students.email, body.email),
+                eq(students.registration, body.registration)
               )
             )
           )
@@ -77,28 +49,24 @@ export const PostStudents: FastifyPluginAsyncZod = async (app) => {
           return reply.status(400).send({ message: "Estudante já cadastrado" });
         }
 
-        // Atualiza o eartudante se tudo existiver ok
-        const [student] = await db
-          .insert(students)
-          .values({
-            registration,
-            name,
-            email,
-            contact,
-            series,
-            shift,
-            url_profile,
-          })
-          .returning();
+        // Atualiza o estudante se tudo existiver ok
+        const [student] = await db.insert(students).values(body).returning();
 
         console.log("Post Estudante", student);
 
-        return reply.status(201).send(student);
+        return reply.status(201).send({
+          message: "Estudante criado com sucesso",
+        });
       } catch (error) {
+        if (error instanceof z.ZodError) {
+          return reply
+            .status(400)
+            .send({ message: "invalid request body!", errors: error.errors });
+        }
         console.log(error);
-        return reply
-          .status(500)
-          .send({ message: "Erro interno ao atualizar Estudante." });
+        return reply.status(500).send({
+          message: "Internal server error",
+        });
       }
     }
   );

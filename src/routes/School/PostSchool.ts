@@ -2,6 +2,11 @@ import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import z from "zod";
 import { db } from "../../drizzle/client";
 import { schools } from "../../drizzle/schema/schools";
+import {
+  MessageSchema,
+  SchoolCreateSchema,
+  ValidationErrorSchema,
+} from "../../utils/SchemasRoutes";
 
 export const PostSchools: FastifyPluginAsyncZod = async (app) => {
   app.post(
@@ -19,35 +24,32 @@ export const PostSchools: FastifyPluginAsyncZod = async (app) => {
           city: z.string().min(1, "Cidade é obrigatória").default("Cáceres"),
         }),
         response: {
-          201: z.object({
-            id: z.string().min(6),
-            name: z.string().min(1),
-            city: z.string().min(1),
-            status: z.boolean(),
-            disabled_at: z.date().nullable().optional(),
-            created_at: z.date().nullable().optional(),
-            updated_at: z.date().nullable().optional(),
-            deleted_at: z.date().nullable().optional(),
-          }),
+          201: SchoolCreateSchema,
+          400: ValidationErrorSchema,
+          500: MessageSchema,
         },
       },
     },
-    async (request, reply) => {
-      const { name, city } = request.body;
+    async (request, reply) => { 
 
-      const result = await db
-        .insert(schools)
-        .values({
-          name,
-          city,
-        })
-        .returning();
+      const body = SchoolCreateSchema.parse(request.body);
 
-        
+      try {
+        const result = await db.insert(schools).values(body).returning();
 
-      const school = result[0];
-
-      return reply.status(201).send(school);
+        const school = result[0];
+        return reply.status(201).send(school);
+      } catch (error) {
+        if (error instanceof z.ZodError) {
+          return reply
+            .status(400)
+            .send({ message: "invalid request body!", errors: error.errors });
+        }
+        console.log(error);
+        return reply.status(500).send({
+          message: "Internal server error",
+        });
+      }
     }
   );
 };
