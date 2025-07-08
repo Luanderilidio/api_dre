@@ -41,6 +41,7 @@ export const GetGremioProcessRedefinition: FastifyPluginAsyncZod = async (
           ]),
           // 200: GetProcessRedefinitionSchema,
           400: MessageSchema,
+          404: MessageSchema,
           500: MessageSchema,
         },
       },
@@ -65,13 +66,16 @@ export const GetGremioProcessRedefinition: FastifyPluginAsyncZod = async (
         case "gremio_id": {
           try {
             const filter_with_gremio_id =
-              await db.query.gremioProcessRedefinition.findFirst({
-                where: eq(
-                  gremioProcessRedefinition.gremio_id,
-                  gremio_id!
-                ),
+              await db.query.gremioProcessRedefinition.findMany({
+                where: eq(gremioProcessRedefinition.gremio_id, gremio_id!),
                 with: { stages: true },
               });
+
+            if (!filter_with_gremio_id) {
+              return reply.status(404).send({
+                message: "Não existe processo de redefinição",
+              });
+            }
 
             return reply.status(200).send(filter_with_gremio_id);
           } catch (error) {
