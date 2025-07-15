@@ -77,7 +77,7 @@ export const StudentUpdateSchema = StudentCreateSchema.partial();
 
 export const AllStudentSchema = z.array(StudentBaseSchema);
 
-
+// SCHEMA PROCESS REDEFINITION STUDENTS ===========================================
 
 export const GremioProcessRedefinitionStagesBaseSchema = z.object({
   gremio_process_id: z.string().min(6),
@@ -117,6 +117,26 @@ export const GetProcessRedefinitionWithStagesSchema = z
   })
   .merge(ProcessRedefinitionBaseSchema)
   .merge(TimestampsMetadata);
+
+// ================== SCHEMA GREMIO ==================
+
+export const GremioBaseSchema = z
+  .object({
+    name: z.string().min(1),
+    status: z.boolean().default(true),
+    url_profile: z.string().url().nullable(),
+    url_folder: z.string().url().nullable(),
+    url_action_plan: z.string().url().nullable(),
+
+    school_id: z.string().min(6),
+    interlocutor_id: z.string().min(6),
+
+    validity_date: z.date().nullable(),
+    approval_date: z.date().nullable(),
+  })
+  .merge(TimestampsMetadata);
+
+
 
 export const MessageSchema = z.object({
   message: z.string(),

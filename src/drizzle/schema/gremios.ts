@@ -28,6 +28,10 @@ export const gremios = pgTable(
       .references(() => schools.id, { onDelete: "cascade" })
       .unique(), // garante um único grêmio por escola
 
+
+    url_action_plan: text("url_action_plan").notNull(),
+
+
     // FK para interlocutor (associado ao grêmio)
     interlocutor_id: text("interlocutor_id")
       .notNull()
