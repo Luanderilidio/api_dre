@@ -54,7 +54,9 @@ export const GetAllStudents: FastifyPluginAsyncZod = async (app) => {
               });
             }
             return reply.status(200).send(available);
-          } catch (error) {}
+          } catch (error) {
+            console.log(error)
+          }
           break;
 
         default:

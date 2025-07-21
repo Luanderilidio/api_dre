@@ -29,12 +29,6 @@ export const GetSchoolsById: FastifyPluginAsyncZod = async (app) => {
       try {
         const { id } = request.params;
 
-        // const [school] = await db
-        //   .select()
-        //   .from(schools)
-        //   .where(eq(schools.id, id))
-        //   .limit(1);
-
         const school = await db.query.schools.findFirst({
           where: eq(schools.id, id),
         });

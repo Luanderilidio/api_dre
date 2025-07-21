@@ -3,6 +3,11 @@ import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import z from "zod";
 import { db } from "../../drizzle/client";
 import { interlocutors } from "../../drizzle";
+import {
+  InterlocutorBaseSchema,
+  MessageSchema,
+  ValidationErrorSchema,
+} from "../../utils/SchemasRoutes";
 
 export const GetInterlocutorsById: FastifyPluginAsyncZod = async (app) => {
   app.get(
@@ -13,38 +18,36 @@ export const GetInterlocutorsById: FastifyPluginAsyncZod = async (app) => {
         summary: "Obtém um interlocutor pelo ID",
         params: z.object({ id: z.string().min(6) }),
         response: {
-          200: z.object({
-            id: z.string().min(6),
-            name: z.string().min(1),
-            contact: z.string(),
-            email: z.string().email(),
-            status: z.boolean(),
-            created_at: z.date(),
-            updated_at: z.date().nullable().optional(),
-            deleted_at: z.date().nullable().optional(),
-          }),
-          404: z.object({ message: z.string() }),
-          500: z.object({ message: z.string() }),
+          200: InterlocutorBaseSchema,
+          400: ValidationErrorSchema,
+          404: MessageSchema,
+          500: MessageSchema,
         },
       },
     },
     async (request, reply) => {
+      const { id } = request.params;
       try {
-        const { id } = request.params;
-        const interlocutor = await db
-          .select()
-          .from(interlocutors)
-          .where(eq(interlocutors.id, id))
-          .limit(1);
+        const interlocutor = await db.query.interlocutors.findFirst({
+          where: eq(interlocutors.id, id),
+        });
 
-        if (interlocutor.length === 0) {
-          return reply.status(404).send({ message: "Interlocutor não encontrado" });
+        if (!interlocutor) {
+          return reply
+            .status(404)
+            .send({ message: "Interlocutor não encontrado" });
         }
-        console.log(interlocutor[0]);
-        return reply.status(200).send(interlocutor[0]);
+
+        return reply.status(200).send(interlocutor);
       } catch (error) {
-        console.error("Erro ao buscar Interlocutor:", error);
-        return reply.status(500).send({ message: "Erro interno do servidor" });
+        if (error instanceof z.ZodError) {
+          return reply.status(400).send({
+            message: "invalid request body",
+            errors: error.errors,
+          });
+        }
+        console.error(error);
+        return reply.status(500).send({ message: "internal server error" });
       }
     }
   );

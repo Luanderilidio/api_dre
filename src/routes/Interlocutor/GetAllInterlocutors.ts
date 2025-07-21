@@ -3,6 +3,11 @@ import z from "zod";
 import { db } from "../../drizzle/client";
 import { gremios, interlocutors } from "../../drizzle";
 import { notInArray } from "drizzle-orm";
+import {
+  AllInterlocutorSchema,
+  MessageSchema,
+  ValidationErrorSchema,
+} from "../../utils/SchemasRoutes";
 
 export const GetAllInterlocutors: FastifyPluginAsyncZod = async (app) => {
   app.get(
@@ -21,76 +26,68 @@ export const GetAllInterlocutors: FastifyPluginAsyncZod = async (app) => {
             ),
         }),
         response: {
-          200: z.array(
-            z.object({
-              id: z.string().min(6),
-              name: z.string().min(1),
-              contact: z.string(),
-              email: z.string().email(),
-              status: z.boolean(),
-              created_at: z.date().nullable().optional(),
-              updated_at: z.date().nullable().optional(),
-              deleted_at: z.date().nullable().optional(),
-              disabled_at: z.date().nullable().optional(),
-            })
-          ),
-          500: z.object({
-            message: z.string(),
-          }),
+          200: AllInterlocutorSchema,
+          400: ValidationErrorSchema,
+          404: MessageSchema,
+          500: MessageSchema,
         },
       },
     },
     async (request, reply) => {
       const { free } = request.query;
 
-      if (free === "true") {
-        try {
-          // Busca todos os interlocutores que já estão em algum grêmio
-          const usedInterlocutors = await db
-            .select({ id: gremios.interlocutor_id })
-            .from(gremios);
+      switch (free) {
+        case "true":
+          try {
+            const usedInterlocutors = await db
+              .select({ id: gremios.interlocutor_id })
+              .from(gremios);
 
-          const usedIds = usedInterlocutors.map(
-            (interlocutor) => interlocutor.id
-          );
+            const usedIds = usedInterlocutors.map(
+              (interlocutor) => interlocutor.id
+            );
 
-          const available = await db
-            .select()
-            .from(interlocutors)
-            .where(notInArray(interlocutors.id, usedIds));
+            const availableInterlocutors = await db
+              .select()
+              .from(interlocutors)
+              .where(notInArray(interlocutors.id, usedIds));
 
-          if (available.length === 0) {
-            return reply
-              .status(404)
-              .send({
-                message: "Não foi encontrado nenhum interlocutor disponível",
+            if (availableInterlocutors.length === 0) {
+              return reply.status(404).send({
+                message: "Nenhum interlocutor disponível!",
               });
+            }
+            return reply.status(200).send(availableInterlocutors);
+          } catch (error) {
+            if (error instanceof z.ZodError) {
+              return reply.status(400).send({
+                message: "invalid request body",
+                errors: error.errors,
+              });
+            }
+            console.error(error);
+            return reply.status(500).send({ message: "internal server error" });
           }
+        default:
+          try {
+            const allInterlocutors = await db.select().from(interlocutors);
 
-          return reply.status(200).send(available);
-        } catch (error) {
-          console.error("Erro ao buscar Interlocutores disponíveis", error);
-          return reply
-            .status(500)
-            .send({ message: "Erro interno do servidor" });
-        }
-      }
-
-      try {
-        const Allinterlocutor = await db.select().from(interlocutors);
-
-        console.log(Allinterlocutor);
-
-        if (Allinterlocutor.length === 0) {
-          return reply
-            .status(404)
-            .send({ message: "Nenhum interlocutor cadastrado" });
-        }
-
-        return reply.status(200).send(Allinterlocutor);
-      } catch (error) {
-        console.error("Erro ao buscar Interlocutores", error);
-        return reply.status(500).send({ message: "Erro interno do servidor" });
+            if (!allInterlocutors) {
+              return reply.status(404).send({
+                message: "Nenhum interlocutor encontrado!",
+              });
+            }
+            return reply.status(200).send(allInterlocutors);
+          } catch (error) {
+            if (error instanceof z.ZodError) {
+              return reply.status(400).send({
+                message: "invalid request body",
+                errors: error.errors,
+              });
+            }
+            console.error(error);
+            return reply.status(500).send({ message: "internal server error" });
+          }
       }
     }
   );

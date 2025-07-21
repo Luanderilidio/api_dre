@@ -3,6 +3,11 @@ import z from "zod";
 import { db } from "../../drizzle/client";
 import { interlocutors } from "../../drizzle/schema/interlocutors";
 import { eq } from "drizzle-orm";
+import {
+  InterlocutorCreateSchema,
+  MessageSchema,
+  ValidationErrorSchema,
+} from "../../utils/SchemasRoutes";
 
 export const PostInterlocutors: FastifyPluginAsyncZod = async (app) => {
   app.post(
@@ -12,65 +17,45 @@ export const PostInterlocutors: FastifyPluginAsyncZod = async (app) => {
         tags: ["interlocutors"],
         summary: "cadastra um interlocutor",
         description: "descrição da rota",
-        body: z.object({
-          name: z.string().min(1, "Nome é obrigatório"),
-          email: z.string().email().nonempty(),
-          contact: z.string().nonempty(),
-        }),
+        body: InterlocutorCreateSchema,
         response: {
-          201: z.object({
-            id: z.string().min(6),
-            name: z.string().min(1),
-            contact: z.string(),
-            email: z.string().email(),
-            status: z.boolean(),
-            disabled_at: z.date().nullable().optional(),
-            created_at: z.date().nullable().optional(),
-            updated_at: z.date().nullable().optional(),
-            deleted_at: z.date().nullable().optional(),
-          }),
-          500: z.object({
-            message: z.string(),
-          }),
+          201: MessageSchema,
+          400: ValidationErrorSchema,
+          404: MessageSchema,
+          500: MessageSchema,
         },
       },
     },
     async (request, reply) => {
-      try {
-        const { name, email, contact } = request.body;
+      const body = InterlocutorCreateSchema.parse(request.body);
 
-        // verifica se já existe esse email
+      try {
         const emailExists = await db
           .select()
           .from(interlocutors)
-          .where(eq(interlocutors.email, email));
+          .where(eq(interlocutors.email, body.email));
 
         // se existir, dispara uma mensagem
         if (emailExists.length > 0) {
-          return reply.status(400).send({
+          return reply.status(404).send({
             message: "Email já está cadastrado.",
           });
         }
 
-        // faz o cadastro do novo interlocutor
-        const result = await db
-          .insert(interlocutors)
-          .values({
-            name,
-            email,
-            contact,
-          })
-          .returning();
-
-        const interlocutor = result[0];
-
-        console.log(interlocutor);
-
-        // envia uma mensagem que o interlocutor foi cadastrado
-        return reply.status(201).send(interlocutor);
+        const result = await db.insert(interlocutors).values(body).returning(); 
+        console.log(result)
+        return reply.status(201).send({
+          message: "interlocutor cadastrado com sucesso!",
+        });
       } catch (error) {
+        if (error instanceof z.ZodError) {
+          return reply
+            .status(400)
+            .send({ message: "invalid request body!", errors: error.errors });
+        }
+        console.log(error);
         return reply.status(500).send({
-          message: "internal error database ",
+          message: "Internal server error",
         });
       }
     }

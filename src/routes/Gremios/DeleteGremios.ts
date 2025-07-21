@@ -3,6 +3,7 @@ import { db } from "../../drizzle/client";
 import { gremios } from "../../drizzle/schema/gremios";
 import { eq } from "drizzle-orm";
 import z from "zod";
+import { MessageSchema } from "../../utils/SchemasRoutes";
 
 export const DeleteGremios: FastifyPluginAsyncZod = async (app) => {
   app.delete(
@@ -16,15 +17,9 @@ export const DeleteGremios: FastifyPluginAsyncZod = async (app) => {
           id: z.string().min(6),
         }),
         response: {
-          200: z.object({
-            message: z.string(),
-          }),
-          404: z.object({
-            message: z.string(),
-          }),
-          500: z.object({
-            message: z.string(),
-          }),
+          200: MessageSchema,
+          404: MessageSchema,
+          500: MessageSchema,
         },
       },
     },

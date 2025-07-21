@@ -19,7 +19,7 @@ export const PathSchoolsById: FastifyPluginAsyncZod = async (app) => {
         body: SchoolUpdateSchema,
         response: {
           200: MessageSchema,
-          400: ValidationErrorSchema,
+          400: z.union([ValidationErrorSchema, MessageSchema]),
           404: MessageSchema,
           500: MessageSchema,
         },
@@ -31,6 +31,12 @@ export const PathSchoolsById: FastifyPluginAsyncZod = async (app) => {
 
 
         const body = SchoolUpdateSchema.partial().parse(request.body); 
+
+        if (Object.keys(body).length === 0) {
+        return reply
+          .status(400)
+          .send({ message: "Nenhum campo fornecido para atualização." });
+      }
 
         const update = await db
           .update(schools)

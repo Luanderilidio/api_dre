@@ -30,6 +30,21 @@ export const ROLES_ARRAY = [
   Stages.Posse,
 ] as const;
 
+const roles = [
+  "DIRETOR",
+  "VICE-PRESIDENTE",
+  "SECRETÁRIO GERAL I",
+  "SECRETÁRIO GERAL II",
+  "1° SECRETÁRIO",
+  "TESOUREIRO GERAL",
+  "1º TESOUREIRO",
+  "DIRETOR SOCIAL",
+  "DIRETOR DE COMUNICAÇÃO",
+  "DIRETOR DE ESPORTES E CULTURA",
+  "DIRETOR DE SAÚDE E MEIO AMBIENTE",
+] as const;
+
+export const RoleEnumZod = z.enum(roles);
 export const StagesEnumZod = z.enum(stages);
 
 export const TimestampsMetadata = z.object({
@@ -38,6 +53,8 @@ export const TimestampsMetadata = z.object({
   deleted_at: z.date().nullable(),
   disabled_at: z.date().nullable(),
 });
+
+// ================== SCHOOL SCHEMA ==============
 
 export const SchoolBaseSchema = z
   .object({
@@ -50,32 +67,67 @@ export const SchoolBaseSchema = z
 
 export const SchoolCreateSchema = SchoolBaseSchema.omit({
   id: true,
+  created_at: true,
+  updated_at: true,
+  deleted_at: true,
+  disabled_at: true,
 });
 
 export const SchoolUpdateSchema = SchoolCreateSchema.partial();
 
 export const AllSchoolSchema = z.array(SchoolBaseSchema);
 
-// SCHEMA STUDENTS ===========================================
+// ======================= SCHEMA STUDENTS =======================
 
-export const StudentBaseSchema = z.object({
-  id: z.string().min(6),
-  name: z.string().min(1),
-  registration: z.string(),
-  contact: z.string(),
-  email: z.string().email(),
-  series: z.string(),
-  shift: z.enum(["matutino", "vespertino", "noturno", "integral"]),
-  url_profile: z.string().nullable(),
-});
+export const StudentBaseSchema = z
+  .object({
+    id: z.string().min(6),
+    name: z.string().min(1),
+    registration: z.string(),
+    contact: z.string(),
+    email: z.string().email(),
+    series: z.string(),
+    shift: z.enum(["matutino", "vespertino", "noturno", "integral"]),
+    url_profile: z.string().nullable(),
+    status: z.boolean().default(true)
+  })
+  .merge(TimestampsMetadata);
 
 export const StudentCreateSchema = StudentBaseSchema.omit({
   id: true,
+  created_at: true,
+  updated_at: true,
+  deleted_at: true,
+  disabled_at: true,
 });
 
 export const StudentUpdateSchema = StudentCreateSchema.partial();
 
 export const AllStudentSchema = z.array(StudentBaseSchema);
+
+// ======================= SCHEMA INTERLOCUTORS =======================
+
+export const InterlocutorBaseSchema = z
+  .object({
+    id: z.string().min(6),
+    name: z.string().min(1),
+    email: z.string().email(),
+    status: z.boolean().default(true),
+    contact: z.string(),
+  })
+  .merge(TimestampsMetadata);
+
+export const InterlocutorCreateSchema = InterlocutorBaseSchema.omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+  deleted_at: true,
+  disabled_at: true,
+});
+
+export const InterlocutorUpdateSchema = InterlocutorCreateSchema.partial();
+
+export const AllInterlocutorSchema = z.array(InterlocutorBaseSchema);
 
 // SCHEMA PROCESS REDEFINITION STUDENTS ===========================================
 
@@ -118,26 +170,73 @@ export const GetProcessRedefinitionWithStagesSchema = z
   .merge(ProcessRedefinitionBaseSchema)
   .merge(TimestampsMetadata);
 
-// ================== SCHEMA GREMIO ==================
+// ======================= SCHEMA MEMBERS =======================
 
-export const GremioBaseSchema = z
+export const MemberBaseSchema = z
   .object({
-    name: z.string().min(1),
-    status: z.boolean().default(true),
-    url_profile: z.string().url().nullable(),
-    url_folder: z.string().url().nullable(),
-    url_action_plan: z.string().url().nullable(),
-
-    school_id: z.string().min(6),
-    interlocutor_id: z.string().min(6),
-
-    validity_date: z.date().nullable(),
-    approval_date: z.date().nullable(),
+    id: z.string().min(6),
+    role: RoleEnumZod,
+    status: z.boolean(),
+    gremio_id: z.string().min(6),
+    student_id: z.string().min(6),
   })
   .merge(TimestampsMetadata);
 
+export const MemberCreateSchema = MemberBaseSchema.omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+  deleted_at: true,
+  disabled_at: true,
+});
 
+export const MemberUpdateSchema = MemberCreateSchema.partial();
 
+export const AllMemberSchema = z.array(MemberBaseSchema);
+export const AllMemberWithStudents = z.array(
+  z.object({
+    MemberBaseSchema,
+    student: StudentBaseSchema,
+  })
+);
+
+// ================== SCHEMA GREMIO ==================
+
+export const GremioBaseSchema = z.object({
+  id: z.string().min(6),
+  name: z.string().min(1),
+  status: z.boolean().default(true),
+  url_profile: z.string().url().nullable(),
+  url_folder: z.string().url().nullable(),
+  url_action_plan: z.string().url().nullable(),
+
+  school_id: z.string().min(6),
+  interlocutor_id: z.string().min(6),
+
+  validity_date: z.date().nullable(),
+  approval_date: z.date().nullable(),
+});
+
+export const GremioCreateSchema = GremioBaseSchema.omit({
+  id: true,
+});
+
+export const UpdateGremioSchema = GremioCreateSchema.partial();
+
+export const AllGremioSchema = z.array(GremioBaseSchema);
+
+export const AllGremioWithMembersSchema = z.array(
+  GremioBaseSchema.omit({
+    school_id: true,
+    interlocutor_id: true,
+  }).extend({
+    interlocutor: InterlocutorBaseSchema,
+    school: SchoolBaseSchema,
+    members: AllMemberWithStudents,
+  })
+);
+
+// ==================== MESSAGENS ====================
 export const MessageSchema = z.object({
   message: z.string(),
 });

@@ -24,7 +24,7 @@ export const PostSchools: FastifyPluginAsyncZod = async (app) => {
           city: z.string().min(1, "Cidade é obrigatória").default("Cáceres"),
         }),
         response: {
-          201: SchoolCreateSchema,
+          201: MessageSchema,
           400: ValidationErrorSchema,
           500: MessageSchema,
         },
@@ -38,7 +38,9 @@ export const PostSchools: FastifyPluginAsyncZod = async (app) => {
         const result = await db.insert(schools).values(body).returning();
 
         const school = result[0];
-        return reply.status(201).send(school);
+        return reply.status(201).send({
+          message: "Escola cadastrada com sucesso!"
+        });
       } catch (error) {
         if (error instanceof z.ZodError) {
           return reply
