@@ -5,6 +5,7 @@ import { db } from "../../drizzle/client";
 import { gremios } from "../../drizzle/schema/gremios";
 import { schools } from "../../drizzle/schema/schools";
 import { interlocutors } from "../../drizzle/schema/interlocutors";
+import { GremioCreateSchema, MessageSchema } from "../../utils/SchemasRoutes";
 
 const roles = [
   "DIRETOR",
@@ -33,69 +34,43 @@ export const PostGremios: FastifyPluginAsyncZod = async (app) => {
         summary: "Cadastra um Grêmio",
         description:
           "Cria um novo grêmio vinculado a uma escola e interlocutor",
-        body: z.object({
-          name: z.string().min(1),
-          status: z.boolean().default(true),
-          url_profile: z.string().nullable().optional(),
-          url_folder: z.string().nullable().optional(),
-          validity_date: z.string().transform((val) => new Date(val)),
-          approval_date: z.string().transform((val) => new Date(val)),
-          school_id: z.string().min(6),
-          interlocutor_id: z.string().min(6),
-        }),
+        body: GremioCreateSchema,
         response: {
-          201: z.object({
-            gremio_id: z.string(),
-          }),
-          400: z.object({
-            message: z.string(),
-          }),
-          500: z.object({
-            message: z.string(),
-          }),
+          201: MessageSchema,
+          400: MessageSchema,
+          500: MessageSchema,
         },
       },
     },
     async (request, reply) => {
+      const body = GremioCreateSchema.parse(request.body);
       try {
-        const {
-          name,
-          status,
-          url_profile,
-          url_folder,
-          validity_date,
-          approval_date,
-          school_id,
-          interlocutor_id,
-        } = request.body;
-
-        // 🏫 Verifica se a escola existe
-        const school = await db
+        const schoolExists = await db
           .select()
           .from(schools)
-          .where(eq(schools.id, school_id));
+          .where(eq(schools.id, body.school_id));
 
-        if (school.length === 0) {
+        if (schoolExists.length === 0) {
           return reply.status(400).send({
-            message: "Escola não encontrada.",
+            message: "Escola não existe.",
           });
         }
 
         const interlocutor = await db
           .select()
           .from(interlocutors)
-          .where(eq(interlocutors.id, interlocutor_id));
+          .where(eq(interlocutors.id, body.interlocutor_id));
 
         if (interlocutor.length === 0) {
           return reply.status(400).send({
-            message: "Interlocutor não encontrado.",
+            message: "Interlocutor não existe.",
           });
         }
 
         const gremioExists = await db
           .select()
           .from(gremios)
-          .where(eq(gremios.school_id, school_id));
+          .where(eq(gremios.school_id, body.school_id));
 
         if (gremioExists.length > 0) {
           return reply.status(400).send({
@@ -103,24 +78,12 @@ export const PostGremios: FastifyPluginAsyncZod = async (app) => {
           });
         }
 
-        const [gremio] = await db
-          .insert(gremios)
-          .values({
-            name,
-            status,
-            url_profile,
-            url_folder,
-            validity_date,
-            approval_date,
-            school_id,
-            interlocutor_id,
-          })
-          .returning();
+        const [gremio] = await db.insert(gremios).values(body).returning();
 
-          console.log(gremio)
+        console.log(gremio);
 
         return reply.status(201).send({
-          gremio_id: gremio.id
+          message: "Gremio criado com sucesso"
         });
       } catch (error) {
         console.error("Erro ao criar grêmio:", error);

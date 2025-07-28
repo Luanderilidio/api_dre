@@ -1,9 +1,215 @@
 {
-  "id": "91edd386-0e9e-4c33-92bf-bef30f0e6773",
+  "id": "ae9d308d-2217-4d9b-a562-366c51d8c7dc",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
+    "public.gremio_process_redefinition": {
+      "name": "gremio_process_redefinition",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "gremio_id": {
+          "name": "gremio_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "observation": {
+          "name": "observation",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "year": {
+          "name": "year",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "disabled_at": {
+          "name": "disabled_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "gremio_process_redefinition_gremio_id_year_unique": {
+          "name": "gremio_process_redefinition_gremio_id_year_unique",
+          "columns": [
+            {
+              "expression": "gremio_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "year",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "gremio_process_redefinition_gremio_id_gremios_id_fk": {
+          "name": "gremio_process_redefinition_gremio_id_gremios_id_fk",
+          "tableFrom": "gremio_process_redefinition",
+          "tableTo": "gremios",
+          "columnsFrom": [
+            "gremio_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.gremio_process_redefinition_stages": {
+      "name": "gremio_process_redefinition_stages",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "gremio_process_id": {
+          "name": "gremio_process_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "order": {
+          "name": "order",
+          "type": "serial",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "stage": {
+          "name": "stage",
+          "type": "stages",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "started_at": {
+          "name": "started_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "finished_at": {
+          "name": "finished_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "observation": {
+          "name": "observation",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "disabled_at": {
+          "name": "disabled_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "gremio_process_redefinition_stages_gremio_process_id_gremio_process_redefinition_id_fk": {
+          "name": "gremio_process_redefinition_stages_gremio_process_id_gremio_process_redefinition_id_fk",
+          "tableFrom": "gremio_process_redefinition_stages",
+          "tableTo": "gremio_process_redefinition",
+          "columnsFrom": [
+            "gremio_process_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.gremios": {
       "name": "gremios",
       "schema": "",
@@ -22,6 +228,12 @@
         },
         "school_id": {
           "name": "school_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "url_action_plan": {
+          "name": "url_action_plan",
           "type": "text",
           "primaryKey": false,
           "notNull": true
@@ -610,6 +822,19 @@
     }
   },
   "enums": {
+    "public.stages": {
+      "name": "stages",
+      "schema": "public",
+      "values": [
+        "Comissão Pró-Grêmio",
+        "Assembleia Geral",
+        "Comissão Eleitoral",
+        "Homologação das Chapas",
+        "Campanha Eleitoral",
+        "Votação",
+        "Posse"
+      ]
+    },
     "public.shift": {
       "name": "shift",
       "schema": "public",

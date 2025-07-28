@@ -5,29 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1745592744487,
-      "tag": "0000_sticky_beyonder",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1751313756222,
-      "tag": "0001_puzzling_the_liberteens",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1751482564612,
-      "tag": "0002_mute_norman_osborn",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1751990440010,
-      "tag": "0003_damp_wolfpack",
+      "when": 1753735040400,
+      "tag": "0000_military_killraven",
       "breakpoints": true
     }
   ]

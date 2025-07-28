@@ -1,7 +1,11 @@
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import { db } from "../../drizzle/client";
 import z from "zod";
-import { AllGremioWithMembersSchema } from "../../utils/SchemasRoutes";
+import {
+  AllGremioSchema,
+  AllGremioWithMembersSchema,
+} from "../../utils/SchemasRoutes";
+import { gremios } from "../../drizzle";
 
 export const GetAllGremios: FastifyPluginAsyncZod = async (app) => {
   app.get(
@@ -27,9 +31,9 @@ export const GetAllGremios: FastifyPluginAsyncZod = async (app) => {
     },
     async (request, reply) => {
       const { with_students } = request.query;
-
       try {
-        // 1. Consulta o banco de dados, incluindo relacionamentos conforme necessário
+        // const result = await db.select().from(gremios);
+
         const result = await db.query.gremios.findMany({
           with: {
             school: {
@@ -57,11 +61,9 @@ export const GetAllGremios: FastifyPluginAsyncZod = async (app) => {
                 deleted_at: true,
               },
             },
-            // Se for solicitado, incluir os membros e estudantes
             ...(with_students === "true" && {
               members: {
                 with: {
-                  
                   student: {
                     columns: {
                       id: true,
@@ -95,24 +97,21 @@ export const GetAllGremios: FastifyPluginAsyncZod = async (app) => {
             }),
           },
         });
- 
 
-        // 2. Formata os dados para bater com o schema de resposta
         const formattedResult = result.map((gremio) => {
           const processedMembers =
             gremio.members?.map((member: any) => {
               return {
-                MemberBaseSchema: {
-                  id: member.id,
-                  student_id: member.student_id,
-                  gremio_id: member.gremio_id,
-                  role: member.role,
-                  status: member.status,
-                  created_at: member.created_at,
-                  updated_at: member.updated_at,
-                  deleted_at: member.deleted_at,
-                  disabled_at: member.disabled_at,
-                },
+                id: member.id,
+                student_id: member.student_id,
+                gremio_id: member.gremio_id,
+                role: member.role,
+                status: member.status,
+                created_at: member.created_at,
+                updated_at: member.updated_at,
+                deleted_at: member.deleted_at,
+                disabled_at: member.disabled_at,
+
                 student: member.student,
               };
             }) ?? [];
@@ -123,7 +122,7 @@ export const GetAllGremios: FastifyPluginAsyncZod = async (app) => {
           };
         });
 
-        // 3. Retorna os dados formatados
+        console.log(formattedResult);
         return reply.status(200).send(formattedResult);
       } catch (error) {
         console.error("Erro ao buscar grêmios:", error);

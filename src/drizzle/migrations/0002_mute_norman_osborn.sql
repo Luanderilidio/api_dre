@@ -1,1 +1,0 @@
-ALTER TABLE "gremio_process_redefinition_stages" ADD COLUMN "status" boolean NOT NULL;

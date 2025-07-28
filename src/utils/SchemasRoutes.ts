@@ -89,7 +89,7 @@ export const StudentBaseSchema = z
     series: z.string(),
     shift: z.enum(["matutino", "vespertino", "noturno", "integral"]),
     url_profile: z.string().nullable(),
-    status: z.boolean().default(true)
+    status: z.boolean().default(true),
   })
   .merge(TimestampsMetadata);
 
@@ -194,8 +194,7 @@ export const MemberUpdateSchema = MemberCreateSchema.partial();
 
 export const AllMemberSchema = z.array(MemberBaseSchema);
 export const AllMemberWithStudents = z.array(
-  z.object({
-    MemberBaseSchema,
+  MemberBaseSchema.extend({
     student: StudentBaseSchema,
   })
 );
@@ -208,13 +207,13 @@ export const GremioBaseSchema = z.object({
   status: z.boolean().default(true),
   url_profile: z.string().url().nullable(),
   url_folder: z.string().url().nullable(),
-  url_action_plan: z.string().url().nullable(),
+  url_action_plan: z.string().url(),
 
   school_id: z.string().min(6),
   interlocutor_id: z.string().min(6),
 
-  validity_date: z.date().nullable(),
-  approval_date: z.date().nullable(),
+  validity_date: z.coerce.date().nullable(),
+  approval_date: z.coerce.date().nullable(),
 });
 
 export const GremioCreateSchema = GremioBaseSchema.omit({

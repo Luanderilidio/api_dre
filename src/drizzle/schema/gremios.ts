@@ -20,35 +20,21 @@ export const gremios = pgTable(
       .primaryKey()
       .$defaultFn(() => generateShortId()),
 
-    name: varchar("name").notNull(), // é sempre bom definir o tamanho do varchar
-
-    // FK para escola (cada escola só pode ter um grêmio)
+    name: varchar("name").notNull(), 
     school_id: text("school_id")
       .notNull()
       .references(() => schools.id, { onDelete: "cascade" })
-      .unique(), // garante um único grêmio por escola
-
-
+      .unique(), 
     url_action_plan: text("url_action_plan").notNull(),
-
-
-    // FK para interlocutor (associado ao grêmio)
     interlocutor_id: text("interlocutor_id")
       .notNull()
-      .references(() => interlocutors.id, { onDelete: "set null" }),
-
-    // status do grêmio (ativo ou inativo)
+      .references(() => interlocutors.id, { onDelete: "set null" }), 
     status: boolean("status").default(false).notNull(),
-    url_profile: text("url_profile"),
+    url_profile: text("url_profile"), 
+    validity_date: timestamp("validity_date"), 
+    approval_date: timestamp("approval_date"),  
+    url_folder: text("url_folder"),  
 
-    // datas importantes
-    validity_date: timestamp("validity_date"), // data de validade da chapa
-    approval_date: timestamp("approval_date"), // quando foi aprovado
-
-    // link para documentos ou arquivos do grêmio
-    url_folder: text("url_folder"), // aqui estava incorretamente "school_id" como nome da coluna
-
-    // metadados
     created_at: timestamp("created_at").defaultNow(),
     disabled_at: timestamp("disabled_at"),
     updated_at: timestamp("updated_at"),
