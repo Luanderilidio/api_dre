@@ -4,6 +4,7 @@ import { gremios } from "../../drizzle/schema/gremios";
 import { eq } from "drizzle-orm";
 import z from "zod";
 import { interlocutors, schools } from "../../drizzle";
+import { MessageSchema, UpdateGremioSchema } from "../../utils/SchemasRoutes";
 
 export const PatchGremioById: FastifyPluginAsyncZod = async (app) => {
   app.patch(
@@ -16,45 +17,26 @@ export const PatchGremioById: FastifyPluginAsyncZod = async (app) => {
         params: z.object({
           id: z.string().min(6), // já valida que o ID é string válida
         }),
-        body: z
-          .object({
-            name: z.string().min(1).optional(),
-            status: z.boolean().optional(),
-            url_profile: z.string().nullable().optional(),
-            url_folder: z.string().nullable().optional(),
-            validity_date: z
-              .string()
-              .transform((val) => new Date(val))
-              .optional(),
-            approval_date: z
-              .string()
-              .transform((val) => new Date(val))
-              .optional(),
-            interlocutor_id: z.string().min(6).optional(),
-            school_id: z.string().min(6).optional(),
-          })
-          .refine((data) => Object.keys(data).length > 0, {
-            message: "É necessário informar ao menos um campo para atualizar",
-          }),
+        body: UpdateGremioSchema,
         response: {
-          200: z.object({
-            message: z.string(),
-          }),
-          404: z.object({
-            message: z.string(),
-          }),
-          500: z.object({
-            message: z.string(),
-          }),
+          200: MessageSchema,
+          400: MessageSchema,
+          404: MessageSchema,
+          500: MessageSchema,
         },
       },
     },
     async (request, reply) => {
       const { id } = request.params;
-      const updates = request.body;
+      const body = UpdateGremioSchema.parse(request.body);
 
-      try {
-        // Verifica se o grêmio existe
+      if (Object.keys(body).length === 0) {
+        return reply
+          .status(400)
+          .send({ message: "Nenhum campo fornecido para atualização." });
+      }
+
+      try { 
         const [gremio] = await db
           .select()
           .from(gremios)
@@ -65,26 +47,24 @@ export const PatchGremioById: FastifyPluginAsyncZod = async (app) => {
             message: "Grêmio não encontrado.",
           });
         }
-
-        // Se school_id foi enviado, verifica se existe
-        if (updates.school_id) {
+ 
+        if (body.school_id) {
           const [school] = await db
             .select()
             .from(schools)
-            .where(eq(schools.id, updates.school_id));
+            .where(eq(schools.id, body.school_id));
           if (!school) {
             return reply.status(400).send({
               message: "Escola não encontrada.",
             });
           }
-        }
-
-        // Se interlocutor_id foi enviado, verifica se existe
-        if (updates.interlocutor_id) {
+        } 
+        
+        if (body.interlocutor_id) {
           const [interlocutor] = await db
             .select()
             .from(interlocutors)
-            .where(eq(interlocutors.id, updates.interlocutor_id));
+            .where(eq(interlocutors.id, body.interlocutor_id));
           if (!interlocutor) {
             return reply.status(400).send({
               message: "Interlocutor não encontrado.",
@@ -92,25 +72,23 @@ export const PatchGremioById: FastifyPluginAsyncZod = async (app) => {
           }
         }
 
-        // Faz o update com os campos atualizados + updated_at
         const [updated] = await db
           .update(gremios)
-          .set({
-            ...updates,
-          })
+          .set(body)
           .where(eq(gremios.id, id))
           .returning();
 
-          console.log(updated)
+        console.log(updated);
 
         return reply.status(200).send({
           message: "Grêmio atualizado com sucesso",
         });
       } catch (error) {
-        console.error("Erro ao atualizar grêmio:", error);
-        return reply.status(500).send({
-          message: "Erro interno ao atualizar grêmio.",
-        });
+        if (error instanceof z.ZodError) {
+          return reply.status(400).send({ message: "invalid request body!" });
+        }
+        console.log(error);
+        return reply.status(500).send({ message: "internal server error" });
       }
     }
   );

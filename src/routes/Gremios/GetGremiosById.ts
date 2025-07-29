@@ -3,6 +3,7 @@ import { db } from "../../drizzle/client";
 import z from "zod";
 import { eq } from "drizzle-orm";
 import { gremios } from "../../drizzle/schema/gremios";
+import { GremioBaseSchema, MessageSchema } from "../../utils/SchemasRoutes";
 
 export const GetGremioById: FastifyPluginAsyncZod = async (app) => {
   app.get(
@@ -11,43 +12,15 @@ export const GetGremioById: FastifyPluginAsyncZod = async (app) => {
       schema: {
         tags: ["gremios"],
         summary: "Busca um grêmio pelo ID",
-        description: "Retorna um grêmio com seus relacionamentos",
-        
+        description: "Retorna um grêmio",
+
         params: z.object({
           id: z.string().min(6),
         }),
         response: {
-          200: z.object({
-            id: z.string().min(6),
-            name: z.string(),
-            status: z.boolean(),
-            url_profile: z.string().nullable(),
-            url_folder: z.string().nullable(),
-            validity_date: z.date().nullable(),
-            approval_date: z.date().nullable(),
-            created_at: z.date().nullable(),
-            updated_at: z.date().nullable(),
-            deleted_at: z.date().nullable(),
-            disabled_at: z.date().nullable(),
-
-            school: z.object({
-              id: z.string(),
-              name: z.string(),
-              city: z.string(),
-            }),
-            interlocutor: z.object({
-              id: z.string(),
-              name: z.string(),
-              email: z.string().email(),
-              contact: z.string(),
-            }),
-          }),
-          404: z.object({
-            message: z.string(),
-          }),
-          500: z.object({
-            message: z.string(),
-          }),
+          200: GremioBaseSchema,
+          404: MessageSchema,
+          500: MessageSchema,
         },
       },
     },
@@ -57,10 +30,6 @@ export const GetGremioById: FastifyPluginAsyncZod = async (app) => {
       try {
         const gremio = await db.query.gremios.findFirst({
           where: eq(gremios.id, id),
-          with: {
-            school: true,
-            interlocutor: true,
-          },
         });
 
         if (!gremio) {
@@ -68,7 +37,6 @@ export const GetGremioById: FastifyPluginAsyncZod = async (app) => {
             message: "Grêmio não encontrado",
           });
         }
-
         return reply.status(200).send(gremio);
       } catch (error) {
         console.error("Erro ao buscar grêmio:", error);
