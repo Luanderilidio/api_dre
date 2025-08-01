@@ -7,6 +7,7 @@ import { schools } from "../../drizzle/schema/schools";
 import { interlocutors } from "../../drizzle/schema/interlocutors";
 import { students } from "../../drizzle";
 import { studentsGremioMembers } from "../../drizzle/schema/studentsGremioMembers";
+import { MemberBaseSchema, MemberCreateSchema, MessageSchema } from "../../utils/SchemasRoutes";
 
 const roles = [
   "DIRETOR",
@@ -37,42 +38,21 @@ export const PostMembersGremio: FastifyPluginAsyncZod = async (app) => {
         summary: "Cadastra um membro do Grêmio",
         description:
           "Cria um novo membro do grêmio vinculado a uma escola e interlocutor",
-        body: z.object({
-          gremio_id: z.string().min(6),
-          student_id: z.string().min(6),
-          role: RoleEnumZod,
-          status: z.boolean(),
-        }),
+        body: MemberCreateSchema,
         response: {
-          201: z.object({
-            id: z.string().min(6),
-            role: RoleEnumZod,
-            status: z.boolean(),
-            gremio_id: z.string().min(6),
-            student_id: z.string().min(6),
-
-            disabled_at: z.date().nullable().optional(),
-            created_at: z.date().nullable().optional(),
-            updated_at: z.date().nullable().optional(),
-            deleted_at: z.date().nullable().optional(),
-          }),
-          400: z.object({
-            message: z.string(),
-          }),
-          500: z.object({
-            message: z.string(),
-          }),
+          201: MessageSchema,
+          400: MessageSchema,
+          500: MessageSchema,
         },
       },
     },
     async (request, reply) => {
+      const body = MemberBaseSchema.parse(request.body);
       try {
-        const { gremio_id, student_id, role, status } = request.body;
-
         const gremioExistis = await db
           .select()
           .from(gremios)
-          .where(eq(gremios.id, gremio_id));
+          .where(eq(gremios.id, body.gremio_id));
 
         if (gremioExistis.length === 0) {
           return reply.status(400).send({
@@ -83,7 +63,7 @@ export const PostMembersGremio: FastifyPluginAsyncZod = async (app) => {
         const studentExists = await db
           .select()
           .from(students)
-          .where(eq(students.id, student_id));
+          .where(eq(students.id, body.student_id));
 
         if (studentExists.length === 0) {
           return reply.status(400).send({
@@ -94,7 +74,7 @@ export const PostMembersGremio: FastifyPluginAsyncZod = async (app) => {
         const maxStudentsGremioMembers = await db
           .select()
           .from(studentsGremioMembers)
-          .where(eq(studentsGremioMembers.gremio_id, gremio_id));
+          .where(eq(studentsGremioMembers.gremio_id, body.gremio_id));
 
         if (maxStudentsGremioMembers.length >= 11) {
           return reply
@@ -104,17 +84,14 @@ export const PostMembersGremio: FastifyPluginAsyncZod = async (app) => {
 
         const [studentGremioMember] = await db
           .insert(studentsGremioMembers)
-          .values({
-            gremio_id,
-            student_id,
-            role,
-            status,
-          })
+          .values(body)
           .returning();
 
         console.log("Post membro", studentGremioMember);
 
-        return reply.status(201).send(studentGremioMember);
+        return reply
+          .status(201)
+          .send({ message: "Membro Cadastrado com Sucesso!" });
       } catch (error) {
         console.error("Erro ao criar Membro:", error);
         return reply

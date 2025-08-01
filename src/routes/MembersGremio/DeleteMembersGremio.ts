@@ -4,6 +4,7 @@ import { gremios } from "../../drizzle/schema/gremios";
 import { eq } from "drizzle-orm";
 import z from "zod";
 import { studentsGremioMembers } from "../../drizzle";
+import { MessageSchema } from "../../utils/SchemasRoutes";
 
 export const DeleteMembersGremio: FastifyPluginAsyncZod = async (app) => {
   app.delete(
@@ -17,15 +18,9 @@ export const DeleteMembersGremio: FastifyPluginAsyncZod = async (app) => {
           id: z.string().min(6),
         }),
         response: {
-          200: z.object({
-            message: z.string(),
-          }),
-          404: z.object({
-            message: z.string(),
-          }),
-          500: z.object({
-            message: z.string(),
-          }),
+          200: MessageSchema,
+          404: MessageSchema,
+          500: MessageSchema,
         },
       },
     },
@@ -33,7 +28,10 @@ export const DeleteMembersGremio: FastifyPluginAsyncZod = async (app) => {
       const { id } = request.params;
 
       try {
-        const [deleted] = await db.delete(studentsGremioMembers).where(eq(studentsGremioMembers.id, id)).returning();
+        const [deleted] = await db
+          .delete(studentsGremioMembers)
+          .where(eq(studentsGremioMembers.id, id))
+          .returning();
 
         if (!deleted) {
           return reply.status(404).send({

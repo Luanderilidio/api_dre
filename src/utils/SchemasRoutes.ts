@@ -1,4 +1,5 @@
 import z from "zod";
+import { faker } from "@faker-js/faker";
 
 const stages = [
   "Comissão Pró-Grêmio",
@@ -47,11 +48,16 @@ const roles = [
 export const RoleEnumZod = z.enum(roles);
 export const StagesEnumZod = z.enum(stages);
 
+export const zDateField = () =>
+  z
+    .union([z.string().datetime(), z.date(), z.null()])
+    .transform((val) => (val ? new Date(val) : null));
+
 export const TimestampsMetadata = z.object({
-  created_at: z.date().nullable(),
-  updated_at: z.date().nullable(),
-  deleted_at: z.date().nullable(),
-  disabled_at: z.date().nullable(),
+  created_at: zDateField(),
+  updated_at: zDateField(),
+  deleted_at: zDateField(),
+  disabled_at: zDateField(),
 });
 
 // ================== SCHOOL SCHEMA ==============
@@ -59,7 +65,10 @@ export const TimestampsMetadata = z.object({
 export const SchoolBaseSchema = z
   .object({
     id: z.string().min(6),
-    name: z.string().min(1),
+    name: z
+      .string()
+      .min(1)
+      .default(faker.person.fullName({ sex: "male" })),
     city: z.string().min(1),
     status: z.boolean().default(true),
   })
@@ -82,10 +91,13 @@ export const AllSchoolSchema = z.array(SchoolBaseSchema);
 export const StudentBaseSchema = z
   .object({
     id: z.string().min(6),
-    name: z.string().min(1),
+    name: z
+      .string()
+      .min(1)
+      .default(faker.person.fullName({ sex: "male" })),
     registration: z.string(),
     contact: z.string(),
-    email: z.string().email(),
+    email: z.string().email().default(faker.internet.email()),
     series: z.string(),
     shift: z.enum(["matutino", "vespertino", "noturno", "integral"]),
     url_profile: z.string().nullable(),
@@ -110,8 +122,11 @@ export const AllStudentSchema = z.array(StudentBaseSchema);
 export const InterlocutorBaseSchema = z
   .object({
     id: z.string().min(6),
-    name: z.string().min(1),
-    email: z.string().email(),
+    name: z
+      .string()
+      .min(1)
+      .default(faker.person.fullName({ sex: "male" })),
+    email: z.string().email().default(faker.internet.email()),
     status: z.boolean().default(true),
     contact: z.string(),
   })
@@ -193,21 +208,28 @@ export const MemberCreateSchema = MemberBaseSchema.omit({
 export const MemberUpdateSchema = MemberCreateSchema.partial();
 
 export const AllMemberSchema = z.array(MemberBaseSchema);
-export const AllMemberWithStudents = z.array(
-  MemberBaseSchema.extend({
-    student: StudentBaseSchema,
-  })
-);
+export const MemberWithStudent = MemberBaseSchema.extend({
+  student: StudentBaseSchema,
+});
+export const AllMemberWithStudents = z.array(MemberWithStudent);
 
 // ================== SCHEMA GREMIO ==================
 
 export const GremioBaseSchema = z.object({
   id: z.string().min(6),
-  name: z.string().min(1),
+  name: z.string().min(1).default(faker.food.fruit()),
   status: z.boolean().default(true),
-  url_profile: z.string().url().nullable(),
-  url_folder: z.string().url().nullable(),
-  url_action_plan: z.string().url(),
+  url_profile: z
+    .string()
+    .url()
+    .nullable()
+    .default(faker.image.urlPicsumPhotos()),
+  url_folder: z
+    .string()
+    .url()
+    .nullable()
+    .default(faker.image.urlPicsumPhotos()),
+  url_action_plan: z.string().url().default(faker.image.urlPicsumPhotos()),
 
   school_id: z.string().min(6),
   interlocutor_id: z.string().min(6),

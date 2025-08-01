@@ -4,6 +4,7 @@ import z from "zod";
 import { studentsGremioMembers } from "../../drizzle";
 import { db } from "../../drizzle/client";
 import { RoleEnumZod } from "./PostMembersGremio";
+import { MemberWithStudent, MessageSchema } from "../../utils/SchemasRoutes";
 
 export const GetMembersGremioById: FastifyPluginAsyncZod = async (app) => {
   app.get(
@@ -15,39 +16,11 @@ export const GetMembersGremioById: FastifyPluginAsyncZod = async (app) => {
         description: "Retorna um membro do grêmio com seus relacionamentos",
         params: z.object({
           id: z.string().min(6),
-        }), 
+        }),
         response: {
-          200: z.object({
-            id: z.string().min(6),
-            gremio_id: z.string().min(6),
-            role: RoleEnumZod,
-            status: z.boolean(),
-            student: z.object({
-              id: z.string(),
-              registration: z.string(),
-              name: z.string(),
-              contact: z.string(),
-              email: z.string().email(),
-              series: z.string(),
-              shift: z.enum(["matutino", "vespertino", "noturno", "integral"]),
-              url_profile: z.string().nullable().optional(), // <- importante isso
-              status: z.boolean(),
-              disabled_at: z.date().nullable().optional(),
-              created_at: z.date().nullable().optional(),
-              updated_at: z.date().nullable().optional(),
-              deleted_at: z.date().nullable().optional(),
-            }),
-            disabled_at: z.date().nullable().optional(),
-            created_at: z.date().nullable().optional(),
-            updated_at: z.date().nullable().optional(),
-            deleted_at: z.date().nullable().optional(),
-          }),
-          404: z.object({
-            message: z.string(),
-          }),
-          500: z.object({
-            message: z.string(),
-          }),
+          200: MemberWithStudent,
+          404: MessageSchema,
+          500: MessageSchema,
         },
       },
     },

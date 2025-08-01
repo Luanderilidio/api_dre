@@ -19,7 +19,7 @@ export const GetAllStudents: FastifyPluginAsyncZod = async (app) => {
           not_participate_gremio: z
             .enum(["true"])
             .optional()
-            .describe("filta apenas os estudantes que não são associados"),
+            .describe("filtra apenas os estudantes que não são associados"),
         }),
         response: {
           200: AllStudentSchema,

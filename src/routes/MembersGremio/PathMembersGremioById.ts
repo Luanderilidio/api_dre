@@ -10,6 +10,7 @@ import {
   studentsGremioMembers,
 } from "../../drizzle";
 import { RoleEnumZod } from "./PostMembersGremio";
+import { MemberUpdateSchema, MessageSchema } from "../../utils/SchemasRoutes";
 
 export const PathMembersGremioById: FastifyPluginAsyncZod = async (app) => {
   app.patch(
@@ -22,37 +23,24 @@ export const PathMembersGremioById: FastifyPluginAsyncZod = async (app) => {
         params: z.object({
           id: z.string().min(6),
         }),
-        body: z.object({
-          gremio_id: z.string().min(6).optional(),
-
-          student_id: z.string().min(6).optional(),
-
-          role: RoleEnumZod.optional(),
-          status: z.boolean().optional(),
-        }),
+        body: MemberUpdateSchema,
         response: {
-          200: z.object({
-            message: z.string(),
-          }),
-          404: z.object({
-            message: z.string(),
-          }),
-          500: z.object({
-            message: z.string(),
-          }),
+          200: MessageSchema,
+          404: MessageSchema,
+          500: MessageSchema,
         },
       },
     },
     async (request, reply) => {
       const { id } = request.params;
-      const { gremio_id, student_id, role, status } = request.body;
+      const body = MemberUpdateSchema.parse(request.body); 
 
       try {
-        if (gremio_id) {
+        if (body.gremio_id) {
           const [gremio] = await db
             .select()
             .from(gremios)
-            .where(eq(gremios.id, gremio_id));
+            .where(eq(gremios.id, body.gremio_id));
 
           if (!gremio) {
             return reply.status(404).send({
@@ -61,11 +49,11 @@ export const PathMembersGremioById: FastifyPluginAsyncZod = async (app) => {
           }
         }
 
-        if (student_id) {
+        if (body.student_id) {
           const [student] = await db
             .select()
             .from(students)
-            .where(eq(students.id, student_id));
+            .where(eq(students.id, body.student_id));
           if (!student) {
             return reply.status(400).send({
               message: "Estudante não encontrado.",
@@ -75,16 +63,11 @@ export const PathMembersGremioById: FastifyPluginAsyncZod = async (app) => {
 
         const [memberGremio] = await db
           .update(studentsGremioMembers)
-          .set({
-            gremio_id,
-            student_id,
-            role,
-            status,
-          })
+          .set(body)
           .where(eq(studentsGremioMembers.id, id))
           .returning();
 
-        console.log("update", memberGremio);
+        console.log(memberGremio);
 
         return reply.status(200).send({
           message: "Grêmio atualizado com sucesso",

@@ -25,13 +25,12 @@ export const PostSchools: FastifyPluginAsyncZod = async (app) => {
         }),
         response: {
           201: MessageSchema,
-          400: ValidationErrorSchema,
+          400: MessageSchema,
           500: MessageSchema,
         },
       },
     },
-    async (request, reply) => { 
-
+    async (request, reply) => {
       const body = SchoolCreateSchema.parse(request.body);
 
       try {
@@ -39,13 +38,13 @@ export const PostSchools: FastifyPluginAsyncZod = async (app) => {
 
         const school = result[0];
         return reply.status(201).send({
-          message: "Escola cadastrada com sucesso!"
+          message: "Escola cadastrada com sucesso!",
         });
       } catch (error) {
         if (error instanceof z.ZodError) {
           return reply
             .status(400)
-            .send({ message: "invalid request body!", errors: error.errors });
+            .send({ message: "invalid request body!"});
         }
         console.log(error);
         return reply.status(500).send({
